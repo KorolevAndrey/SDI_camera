@@ -9,21 +9,24 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 
-public class MainScreen extends Activity {
+public class MainScreen extends Activity implements View.OnClickListener{
 
     // locals block
     SurfaceView sv;
@@ -36,6 +39,29 @@ public class MainScreen extends Activity {
     // finals block
     final int CAMERA_ID = 0;
     final boolean FULLSCREEN = true;
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id){
+            case R.id.id_sv_camera:
+                Log.d("debug", "surface click");
+                if (camera == null){
+                    Log.d("debug", "camera: null");
+                    try {
+                        camera = Camera.open(CAMERA_ID);
+                        camera.startPreview();
+                    } catch (Exception e) {
+                        Log.d("debug", e.getMessage());
+                    }
+                } else {
+                    Log.d("debug", "trying to restart preview");
+                    camera.stopPreview();
+                    camera.startPreview();
+                }
+                break;
+        }
+    }
     // end of finals block
     //--------------------
 
@@ -44,8 +70,9 @@ public class MainScreen extends Activity {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                if (camera == null || holder == null)
-                    return;
+                Log.d("debug", "surfaceCreated");
+                if (camera == null)
+                    camera = Camera.open(CAMERA_ID);
                 camera.setPreviewDisplay(holder);
                 camera.startPreview();
             } catch (IOException e) {
@@ -55,7 +82,14 @@ public class MainScreen extends Activity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            if (camera!=null) camera.stopPreview();
+            Log.d("debug","surfaceChanged");
+            if (camera != null){
+                camera.stopPreview();
+            }else{
+                camera = Camera.open(CAMERA_ID);
+                camera.stopPreview();
+            }
+
             setCameraDisplayOrientation(CAMERA_ID);
             try{
                 camera.setPreviewDisplay(holder);
@@ -67,7 +101,7 @@ public class MainScreen extends Activity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-
+            Log.d("debug", "surfaceDestroyed");
         }
     }
 
@@ -77,20 +111,47 @@ public class MainScreen extends Activity {
                 keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             Log.d("debug", "pressed");
             makeShot();
+            return true;
         }
-        return true;
+
+        return super.onKeyDown(keyCode, event);
     }
 
     private void makeShot(){
-
-        camera.takePicture(null, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
-                File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                CameraManager cm = new CameraManager(pictures_dir);
-                Toast.makeText(getBaseContext(), cm.SavePhoto(data), Toast.LENGTH_LONG).show();
-            }
-        });
+        Camera.Parameters cam_params = camera.getParameters();
+        List<String> focusModes = cam_params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+            // called when user try to make shot
+            // and device has autofocus
+            camera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    // this function called wher camera finished auto focusing
+                    Log.d("debug", "autofocus");
+                    camera.takePicture(null, null, new Camera.PictureCallback() {
+                        @Override
+                        public void onPictureTaken(byte[] data, Camera camera) {
+                            // save picture
+                            File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                            CameraManager cm = new CameraManager(pictures_dir);
+                            Toast.makeText(getBaseContext(), cm.SavePhoto(data), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }// end of autofocus
+            });
+        } else{
+            Log.d("debug", "no autofocus");
+            // called whed device has no autofocus
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    // save picture
+                    File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                    CameraManager cm = new CameraManager(pictures_dir);
+                    Toast.makeText(getBaseContext(), cm.SavePhoto(data), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     @Override
@@ -109,12 +170,15 @@ public class MainScreen extends Activity {
         holderCallback = new HolderCallback();
         holder.addCallback(holderCallback);
         if (camera == null) camera = Camera.open(CAMERA_ID);
+
+        ((SurfaceView) findViewById(R.id.id_sv_camera)).setOnClickListener(this);
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("debug", "onresume");
         if (camera == null) camera = Camera.open(CAMERA_ID);
         Log.d("debug", "camera:" + (camera == null ? " OK" : "NULL"));
     }
@@ -122,7 +186,7 @@ public class MainScreen extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-
+        Log.d("debug", "onpause");
         if (camera != null){
             camera.release();
         }
