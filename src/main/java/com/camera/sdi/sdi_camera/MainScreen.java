@@ -1,6 +1,7 @@
 package com.camera.sdi.sdi_camera;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
@@ -19,6 +20,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
@@ -33,6 +35,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
     SurfaceHolder holder;
     HolderCallback holderCallback;
     Camera camera = null;
+    CameraManager cameraManager = null;
     // end of locals block
     // --------------------
 
@@ -46,23 +49,40 @@ public class MainScreen extends Activity implements View.OnClickListener{
         switch (id){
             case R.id.id_sv_camera:
                 Log.d("debug", "surface click");
-                if (camera == null){
-                    Log.d("debug", "camera: null");
-                    try {
-                        camera = Camera.open(CAMERA_ID);
-                        camera.startPreview();
-                    } catch (Exception e) {
-                        Log.d("debug", e.getMessage());
-                    }
-                } else {
-                    Log.d("debug", "trying to restart preview");
-                    holderCallback.reset();
-                }
+                forceCamera();
+                break;
+
+            case R.id.id_btn_gallery:
+                List<String> lFileNames = cameraManager.getFileNamesInBaseDir();
+                for (String s : lFileNames)
+                    Log.d("debug", s);
+                Log.d("debug", "-------------");
+
+                Intent i = new Intent(this, GalleryScreen.class);
+                camera.stopPreview();
+                camera.release();
+                camera = null;
+                startActivity(i);
                 break;
         }
     }
     // end of finals block
     //--------------------
+
+    private void forceCamera(){
+        if (camera == null){
+            Log.d("debug", "camera: null");
+            try {
+                camera = Camera.open(CAMERA_ID);
+                camera.startPreview();
+            } catch (Exception e) {
+                Log.d("debug", e.getMessage());
+            }
+        } else {
+            Log.d("debug", "trying to restart preview");
+            holderCallback.reset();
+        }
+    }
 
     class HolderCallback implements SurfaceHolder.Callback{
 
@@ -143,11 +163,10 @@ public class MainScreen extends Activity implements View.OnClickListener{
                         @Override
                         public void onPictureTaken(byte[] data, Camera camera) {
                             // save picture
-                            File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                            CameraManager cm = new CameraManager(pictures_dir);
-                            Toast.makeText(getBaseContext(), cm.SavePhoto(data), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), cameraManager.SavePhoto(data) + " autofocus enabled", Toast.LENGTH_LONG).show();
                         }
                     });
+                    forceCamera();
                 }// end of autofocus
             });
         } else{
@@ -159,7 +178,8 @@ public class MainScreen extends Activity implements View.OnClickListener{
                     // save picture
                     File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                     CameraManager cm = new CameraManager(pictures_dir);
-                    Toast.makeText(getBaseContext(), cm.SavePhoto(data), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
+                    forceCamera();
                 }
             });
         }
@@ -175,6 +195,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
         }
         setContentView(R.layout.activity_main_screen);
 
+        File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        cameraManager = new CameraManager(pictures_dir);
+
         sv = (SurfaceView) findViewById(R.id.id_sv_camera);
         holder = sv.getHolder();
 
@@ -183,6 +206,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
         if (camera == null) camera = Camera.open(CAMERA_ID);
 
         ((SurfaceView) findViewById(R.id.id_sv_camera)).setOnClickListener(this);
+        ((Button) findViewById(R.id.id_btn_gallery)).setOnClickListener(this);
     }
 
 
@@ -192,6 +216,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
         Log.d("debug", "onresume");
         if (camera == null) camera = Camera.open(CAMERA_ID);
         Log.d("debug", "camera:" + (camera == null ? " OK" : "NULL"));
+        setPreviewSize(FULLSCREEN);
     }
 
     @Override

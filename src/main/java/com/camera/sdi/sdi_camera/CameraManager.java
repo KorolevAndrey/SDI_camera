@@ -7,10 +7,13 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by sdi on 17.07.14.
@@ -20,8 +23,32 @@ public class CameraManager {
     File outputFile;
     Date date;
 
+    String filesFormat = ".jpg";
+    File[] filesInBaseDir = null;
+
     CameraManager(File BaseDir){
         basePhotoDirectory = BaseDir;
+    }
+
+    public File[] getFilesInBaseDir(){
+        filesInBaseDir = basePhotoDirectory.listFiles( new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.length() > 4 && filename.endsWith(".jpg");
+            }
+        });
+        return filesInBaseDir;
+    }
+
+    public List<String> getFileNamesInBaseDir(){
+        // check new files in baseDir
+        getFilesInBaseDir();
+
+        List<String> lFileNamesInBaseDir = new ArrayList<String>();
+        for (File f : filesInBaseDir){
+            lFileNamesInBaseDir.add(f.getName());
+        }
+        return lFileNamesInBaseDir;
     }
 
     public String SavePhoto(byte[] data){
@@ -31,7 +58,7 @@ public class CameraManager {
         Log.d("debug", "time:" + now.toString());
 
         // create output file in base dir
-        outputFile = new File(basePhotoDirectory, now+".jpg");
+        outputFile = new File(basePhotoDirectory, now + filesFormat); // example: 25-11-2013[12:12:12.11].jpg
         FileOutputStream fos = null;
         try {
             // write data to output file
