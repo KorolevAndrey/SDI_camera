@@ -56,8 +56,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
                     }
                 } else {
                     Log.d("debug", "trying to restart preview");
-                    camera.stopPreview();
-                    camera.startPreview();
+                    holderCallback.reset();
                 }
                 break;
         }
@@ -67,8 +66,12 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
     class HolderCallback implements SurfaceHolder.Callback{
 
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
+        public void reset(){
+            create();
+            change();
+        }
+
+        private void create(){
             try {
                 Log.d("debug", "surfaceCreated");
                 if (camera == null)
@@ -80,8 +83,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
             }
         }
 
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        private void change(){
             Log.d("debug","surfaceChanged");
             if (camera != null){
                 camera.stopPreview();
@@ -97,6 +99,15 @@ public class MainScreen extends Activity implements View.OnClickListener{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            create();
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            change();
         }
 
         @Override
