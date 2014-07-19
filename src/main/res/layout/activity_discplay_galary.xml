@@ -12,10 +12,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="refresh"/>
-    <TableLayout
-        android:id="@+id/id_tl_gallery_table"
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </TableLayout>
-
+        <TableLayout
+            android:id="@+id/id_tl_gallery_table"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </TableLayout>
+    </ScrollView>
 </LinearLayout>

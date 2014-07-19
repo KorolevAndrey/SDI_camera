@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.LoginFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import android.widget.TableRow;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Created by sdi on 18.07.14.
@@ -28,17 +30,22 @@ import java.util.ArrayList;
 public class GalleryScreen extends Activity {
     TableLayout tableLayout = null;
     File[] files = null;
+    DebugLogger Logger = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discplay_galary);
 
+        // use already created log to save data
+        Logger = new DebugLogger(false);
+
         tableLayout = ((TableLayout) findViewById(R.id.id_tl_gallery_table));
         Button btn = ((Button) findViewById(R.id.id_btn_refresh_gallery));
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Logger.Log("refresh button clicked");
                 loadFiles(".jpg");
                 matchTableWithImageView(3);
             }
@@ -47,12 +54,14 @@ public class GalleryScreen extends Activity {
 
     private void loadFiles(final String format) {
         File baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        Logger.Log("try to load data from " + baseDir.getAbsolutePath());
         files = baseDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
                 return filename.length() > 3 && filename.endsWith(format);
             }
         });
+        Logger.Log(files.length + " files found");
     }
 
     private void matchTableWithImageView(int column_count){

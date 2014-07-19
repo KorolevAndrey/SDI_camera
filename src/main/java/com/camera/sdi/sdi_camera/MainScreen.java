@@ -1,6 +1,7 @@
 package com.camera.sdi.sdi_camera;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -24,7 +25,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.List;
 
 
@@ -36,6 +41,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
     HolderCallback holderCallback;
     Camera camera = null;
     CameraManager cameraManager = null;
+    DebugLogger Logger = null;
     // end of locals block
     // --------------------
 
@@ -140,8 +146,27 @@ public class MainScreen extends Activity implements View.OnClickListener{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (    keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
                 keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+
             Log.d("debug", "pressed");
-            makeShot();
+            try {
+                Logger.Log("try to make shot");
+                makeShot();
+                /*Log.d("debug", "getExternalStorageDirectory: " + Environment.getExternalStorageDirectory().getAbsolutePath());
+                Log.d("debug", "getDataDirectory: " + Environment.getDataDirectory().getAbsolutePath());
+                if (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).exists()){
+                    Log.d("debug", "Exists");
+                }
+                try {
+                    Log.d("debug", "Docs: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+                }catch (Exception e){}
+*/
+                Logger.Log( "shot maked");
+                //Toast.makeText(this, Environment.getDataDirectory().getAbsolutePath(), Toast.LENGTH_LONG).show();
+            } catch (Exception e){
+                String text = e.getMessage();
+                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+                Logger.Log( "error : " + text);
+            }
             return true;
         }
 
@@ -149,6 +174,11 @@ public class MainScreen extends Activity implements View.OnClickListener{
     }
 
     private void makeShot(){
+        if (camera == null)
+            Logger.Log("camera is null");
+        else
+            Logger.Log("camera is not null");
+
         Camera.Parameters cam_params = camera.getParameters();
         List<String> focusModes = cam_params.getSupportedFocusModes();
         if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
@@ -158,6 +188,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 @Override
                 public void onAutoFocus(boolean success, Camera camera) {
                     // this function called wher camera finished auto focusing
+                    Logger.Log("[autofocus] try to save photo");
                     Log.d("debug", "autofocus");
                     camera.takePicture(null, null, new Camera.PictureCallback() {
                         @Override
@@ -176,6 +207,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     // save picture
+                    Logger.Log("[no autofocus] try to save photo");
                     File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                     CameraManager cm = new CameraManager(pictures_dir);
                     Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
@@ -207,6 +239,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         ((SurfaceView) findViewById(R.id.id_sv_camera)).setOnClickListener(this);
         ((Button) findViewById(R.id.id_btn_gallery)).setOnClickListener(this);
+
+        // clear log on create
+        Logger = new DebugLogger();
     }
 
 
