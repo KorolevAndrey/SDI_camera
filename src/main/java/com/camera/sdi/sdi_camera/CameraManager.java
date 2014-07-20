@@ -54,14 +54,29 @@ public class CameraManager {
     public String SavePhoto(byte[] data){
         //  get current datetime
         date = new Date();
-        String now = new SimpleDateFormat("dd-MM-yyyy[HH:mm:ss.S]").format(date);
+        String now = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss_S").format(date);
+        //String now = "tmp";
         Log.d("debug", "time:" + now.toString());
 
         // create output file in base dir
+        if (!basePhotoDirectory.exists()) {
+            Log.d("debug", "try to create : " + basePhotoDirectory.getAbsolutePath());
+            basePhotoDirectory.mkdirs();
+            Log.d("debug", basePhotoDirectory.getAbsolutePath() + " created");
+        }
+
         outputFile = new File(basePhotoDirectory, now + filesFormat); // example: 25-11-2013[12:12:12.11].jpg
         FileOutputStream fos = null;
         try {
             // write data to output file
+
+            if (!outputFile.exists()){
+                Log.d("debug", "try to craete: " + outputFile.getAbsolutePath());
+                if (outputFile.createNewFile())
+                    Log.d("debug", "created : " + outputFile.getAbsolutePath());
+                else
+                    Log.d("debug", "created : " + outputFile.getAbsolutePath());
+            }
             fos = new FileOutputStream(outputFile);
             fos.write(data);
             fos.close();

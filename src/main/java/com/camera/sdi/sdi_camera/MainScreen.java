@@ -1,12 +1,14 @@
 package com.camera.sdi.sdi_camera;
 
 import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,12 +44,15 @@ public class MainScreen extends Activity implements View.OnClickListener{
     Camera camera = null;
     CameraManager cameraManager = null;
     DebugLogger Logger = null;
+    SharedStaticAppData appData = null;
+    PowerManager.WakeLock wakeLock = null;
     // end of locals block
     // --------------------
 
     // finals block
     final int CAMERA_ID = 0;
     final boolean FULLSCREEN = true;
+    PowerManager powerManager;
 
     @Override
     public void onClick(View v) {
@@ -194,6 +199,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
                         @Override
                         public void onPictureTaken(byte[] data, Camera camera) {
                             // save picture
+                            File pictures_dir = SharedStaticAppData.getBaseDir();
+                            Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
+                            CameraManager cm = new CameraManager(pictures_dir);
                             Toast.makeText(getBaseContext(), cameraManager.SavePhoto(data) + " autofocus enabled", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -208,7 +216,8 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 public void onPictureTaken(byte[] data, Camera camera) {
                     // save picture
                     Logger.Log("[no autofocus] try to save photo");
-                    File pictures_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                    File pictures_dir = SharedStaticAppData.getBaseDir();
+                    Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
                     CameraManager cm = new CameraManager(pictures_dir);
                     Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
                     forceCamera();
@@ -232,6 +241,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         sv = (SurfaceView) findViewById(R.id.id_sv_camera);
         holder = sv.getHolder();
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         holderCallback = new HolderCallback();
         holder.addCallback(holderCallback);
@@ -242,16 +252,32 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         // clear log on create
         Logger = new DebugLogger();
+
+        // shared data container
+        File base = getExternalFilesDir(null);
+        appData.setBaseDir(base);
+
+        // get power manager to keep screen on
+        powerManager  = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        this.wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "MTag");
+        this.wakeLock.acquire();
     }
 
+    @Override
+    protected void onDestroy() {
+        this.wakeLock.release();
+        super.onDestroy();
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.d("debug", "onresume");
-        if (camera == null) camera = Camera.open(CAMERA_ID);
+        if (camera == null)
+            camera = Camera.open(CAMERA_ID);
         Log.d("debug", "camera:" + (camera == null ? " OK" : "NULL"));
         setPreviewSize(FULLSCREEN);
+        forceCamera();
     }
 
     @Override
@@ -340,6 +366,8 @@ public class MainScreen extends Activity implements View.OnClickListener{
         }
 
         int result = 0;
+
+        Log.d("debug", "degrees: " + degrees);
 
         // get camera info
         Camera.CameraInfo info = new Camera.CameraInfo();

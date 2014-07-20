@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -53,7 +54,7 @@ public class GalleryScreen extends Activity {
     }
 
     private void loadFiles(final String format) {
-        File baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File baseDir = SharedStaticAppData.getBaseDir();
         Logger.Log("try to load data from " + baseDir.getAbsolutePath());
         files = baseDir.listFiles(new FilenameFilter() {
             @Override
