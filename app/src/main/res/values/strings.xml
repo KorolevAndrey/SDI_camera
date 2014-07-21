@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SDI_camera</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="shared_preferences_tag">MySharedPrefTag</string>
+    <string name="sp_long_vk_user_id">VK_USER_ID</string>
+
+    <color name="main_screen_background">#333333</color>
+    <color name="gallery_table_row_background">#999999</color>
+</resources>
