@@ -41,6 +41,7 @@ public class VKManager {
         * загрузка фото на стену. 0 если не на страницу группы
         * */
         //long uid = 0;//Long.parseLong();
+        Log.d("VK", "try to share photo");
         user_id = SharedStaticAppData.restore_VKUserId();
         if (user_id == -1) return false;
 

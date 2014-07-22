@@ -16,12 +16,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="camera"/>
-        <Button
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text = "VK_check"
-            android:id="@+id/id_btn_vk_auth"
-            android:enabled="false"/>
+            android:id="@+id/id_tv_online_status"
+            android:textSize="20dp"
+            android:text="@string/internet_status_online"
+            android:textColor="@color/color_status_online"
+            android:paddingLeft="10dp"/>
     </LinearLayout>
 
     <ScrollView

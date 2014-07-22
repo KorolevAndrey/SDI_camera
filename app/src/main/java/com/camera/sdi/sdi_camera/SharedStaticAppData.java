@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.vk.sdk.VKAccessToken;
@@ -22,6 +24,11 @@ public class SharedStaticAppData {
 
     private static Context context = null;
     private static File baseDir = null;
+
+    // this variable show if alive asyncTask, that check your internet connection
+    // asyncTask will be stoped when this variable will set to "false"
+    // using in asynctask: while (isAlive){...}
+    public static boolean isAlive_AsyncTaskOnlineStatusRefresher = false;
 
     public  static boolean isVkInialized = false;
     private static SharedPreferences sharedPreferences = null;
@@ -70,6 +77,13 @@ public class SharedStaticAppData {
                 mtx, true);
 
         return rotated;
+    }
+
+    public static boolean isOnline(){
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        return (info != null && info.isConnected());
     }
 
     public static void setBaseDir(File nBaseDir){

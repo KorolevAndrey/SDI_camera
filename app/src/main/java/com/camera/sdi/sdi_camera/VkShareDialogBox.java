@@ -68,6 +68,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
         VKAccessToken at = SharedStaticAppData.restore_AccessToken();
         if (SharedStaticAppData.isVkInialized == false){
+            Log.d("VK", "vk init");
             // first creation. Vk sdk must be initialized.
             VKSdk.initialize(vksdkListener, VKManager.strVKAppID, at);
             SharedStaticAppData.isVkInialized = true;
@@ -80,6 +81,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         switch (id){
             case R.id.id_btn_share_photo_vk:
                 //VKManager.WallPostPhoto(sharedPhoto);
+                //shareTask = new SharePhotoTask();
                 shareTask.execute();
                 break;
 
@@ -152,8 +154,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
     };
 
 
-    class SharePhotoTask extends AsyncTask<Void, Void, Void>{
-
+    class SharePhotoTask extends AsyncTask<Void, Void, Boolean>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -162,17 +163,24 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            VKManager.WallPostPhoto(sharedPhoto);
-            return null;
+        protected Boolean doInBackground(Void... params) {
+            Log.d("VK", "Background upload");
+            if (SharedStaticAppData.isOnline()){
+                VKManager.WallPostPhoto(sharedPhoto);
+                return true;}
+
+            return  false;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Boolean aVoid) {
             super.onPostExecute(aVoid);
             Log.d("VK", "share task finished");
             progressBar.setVisibility(View.INVISIBLE);
-            Toast.makeText(context, "upload complete", Toast.LENGTH_SHORT).show();
+
+            String text = aVoid ? "upload finished" : "check your internet connection";
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+
             dismiss();
         }
 

@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -42,6 +43,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     TableLayout tableLayout = null;
     File[] files = null;
     DebugLogger Logger = null;
+    TextView tvOnlineStatus = null;
+
+    RefreshInternetConnectionStatus internetStatusChecker = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +61,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         // use already created log to save data
         Logger = new DebugLogger(false);
 
+        tvOnlineStatus = (TextView) findViewById(R.id.id_tv_online_status);
         tableLayout = ((TableLayout) findViewById(R.id.id_tl_gallery_table));
-        Button btn_vk_auth = (Button) findViewById(R.id.id_btn_vk_auth);
-        btn_vk_auth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(GalleryScreen.this, VKLoginActivity.class);
-                startActivity(i);
-            }
-        });
         //if (VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).isExpired())
         Log.d("VK", "token: " + VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).accessToken);
 
@@ -83,6 +80,10 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
         loadFiles(".jpg");
         matchTableWithImageView(3);
+
+        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
+        internetStatusChecker = new RefreshInternetConnectionStatus();
+        internetStatusChecker.execute();
     }
 
     private void loadFiles(final String format) {
@@ -134,9 +135,37 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         File f = (File)v.getTag();
         //VKManager.WallPostPhoto(f);
+
         VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, f);
+
+        vkShareDialogBox.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
+                internetStatusChecker.cancel(true);
+            }
+        });
+
+        vkShareDialogBox.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
+                internetStatusChecker = new RefreshInternetConnectionStatus();
+                internetStatusChecker.execute();
+            }
+        });
+
         vkShareDialogBox.show();
         //Toast.makeText(this, f.getName(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.d("Internet status", "onPause");
+        /*SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
+        internetStatusChecker.cancel(true);*/
     }
 
     @Override
@@ -149,6 +178,11 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     protected void onResume() {
         super.onResume();
         VKUIHelper.onResume(this);
+
+        Log.d("Internet status", "onResume");
+        /*SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
+        internetStatusChecker = new RefreshInternetConnectionStatus();
+        internetStatusChecker.execute();*/
     }
 
     @Override
@@ -158,5 +192,52 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         Toast.makeText( this,
                 VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).accessToken,
                 Toast.LENGTH_SHORT).show();
+    }
+
+    class RefreshInternetConnectionStatus extends AsyncTask<Void, Void, Void>{
+        boolean isOnline = false;
+        long lastCall = System.currentTimeMillis();
+        long deltaTime = 1000; // equal to 1 second
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            boolean nStatus = SharedStaticAppData.isOnline();
+            publishProgress();
+            while (SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher){
+                if (System.currentTimeMillis() - lastCall < deltaTime) {
+                    try {
+                        Thread.sleep(deltaTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Log.d("Internet status", "called");
+                lastCall = System.currentTimeMillis();
+                nStatus = SharedStaticAppData.isOnline();
+                if (nStatus != isOnline){
+                    // online status changed
+                    // UI must be refreshed
+                    isOnline = nStatus;
+                    publishProgress();
+                    Log.d("Internet status", "is online: " + (isOnline ? "true" : "false"));
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            Log.d("Internet status", "onProgress");
+            if (isOnline) {
+                // set online message
+                tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_online));
+                tvOnlineStatus.setText(getResources().getString(R.string.internet_status_online));
+            }else{
+                // set offline message
+                tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_offline));
+                tvOnlineStatus.setText(getResources().getString(R.string.internet_status_offline));
+            }
+        }
     }
 }
