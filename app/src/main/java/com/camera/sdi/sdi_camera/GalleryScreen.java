@@ -99,6 +99,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     }
 
     private void matchTableWithImageView(int column_count){
+        // clear layout
+        tableLayout.removeAllViews();
+
         // get image widthth
         int img_width = getWindowManager().getDefaultDisplay().getWidth(); //tableLayout.getWidth();
         Log.d("debug", "window width: " + img_width);
@@ -152,6 +155,12 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
                 internetStatusChecker = new RefreshInternetConnectionStatus();
                 internetStatusChecker.execute();
+
+                if ( ((VkShareDialogBox) dialog).isFileExists() == false){
+                    // file was deleted by user
+                    loadFiles(".jpg");
+                    matchTableWithImageView(3);
+                }
             }
         });
 

@@ -3,6 +3,7 @@ package com.camera.sdi.sdi_camera;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,16 +32,26 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
     Context context  = null;
     Button btnShare  = null;
     Button btnCancel = null;
+    Button btnDelete = null;
     File sharedPhoto = null;
+
+    Dialog parent    = null;
 
     ProgressBar progressBar  = null;
     SharePhotoTask shareTask = null;
+
+    public boolean isFileExists(){
+        boolean ret = sharedPhoto.exists();
+        Log.d("Delete File", ret ? sharedPhoto.getName() + " exists" : sharedPhoto.getName() + " not exists");
+        return ret;
+    }
 
     public VkShareDialogBox(Context context, File bmpPhoto) {
         super(context);
 
         this.context = context;
         sharedPhoto = bmpPhoto;
+        parent = this;
     }
 
     @Override
@@ -51,6 +62,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         setContentView(R.layout.dialog_vk_share);
 
         // assign UI
+        btnDelete   = (Button) findViewById(R.id.id_btn_delete_photo);
         btnShare    = (Button) findViewById(R.id.id_btn_share_photo_vk);
         btnCancel   = (Button) findViewById(R.id.id_btn_share_cancel);
         progressBar = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
@@ -58,6 +70,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         // set click_listeners
         btnCancel.setOnClickListener(this);
         btnShare.setOnClickListener(this);
+        btnDelete.setOnClickListener(this);
 
         // set photo
         Bitmap bmp = BitmapFactory.decodeFile(sharedPhoto.getAbsolutePath());
@@ -90,6 +103,26 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
                     shareTask.cancel(true); // true == may interrupt if running
 
                 dismiss();
+                break;
+
+            case R.id.id_btn_delete_photo:
+                DeleteFileDialogBox deleteFileDialogBox = new DeleteFileDialogBox(context, sharedPhoto);
+                deleteFileDialogBox.show();
+                deleteFileDialogBox.setOnCancelListener(new OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        // it means that user don't want to delete file
+                        Log.d("Delete File","user answer is no");
+                    }
+                });
+                deleteFileDialogBox.setOnDismissListener(new OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        // file was deleted by user
+                        Log.d("Delete File","user answer is yes");
+                        parent.dismiss();
+                    }
+                });
                 break;
         }
     }
