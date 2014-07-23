@@ -30,23 +30,34 @@ public class SharedStaticAppData {
     // using in asynctask: while (isAlive){...}
     public static boolean isAlive_AsyncTaskOnlineStatusRefresher = false;
 
+    public static long VK_UploadAlbumId = -1;
+    public static boolean VK_UPLOAD_TO_ALBUM = true; // true -- upload to album; false -- on wall
+
     public  static boolean isVkInialized = false;
     private static SharedPreferences sharedPreferences = null;
     private static String sharedPreferencesTag   = "";
     private static String sp_key_VK_USER_ID      = ""; // shared preferences key for user id in vk.com
     private static String sp_key_VK_ACCESS_TOKEN = ""; // shared preferences access token in vk.com
+    private static String sp_key_VK_ALBUM_ID     = ""; // shared preferences album to upload photo (album_id)
 
     public SharedStaticAppData(Context context){
         this.context = context;
         sharedPreferencesTag = context.getString(R.string.shared_preferences_tag);
-        sharedPreferences = context.getSharedPreferences(sharedPreferencesTag, Context.MODE_PRIVATE);
-        sp_key_VK_USER_ID = context.getString(R.string.sp_long_vk_user_id);
+        sharedPreferences    = context.getSharedPreferences(sharedPreferencesTag, Context.MODE_PRIVATE);
+        sp_key_VK_USER_ID    = context.getString(R.string.sp_long_vk_user_id);
+        sp_key_VK_ALBUM_ID   = context.getString(R.string.sp_long_vk_album_id);
+
         Log.d("VK", "user_id_spKey: " + sp_key_VK_USER_ID);
         Log.d("VK", "try to restore user_id: " + restore_VKUserId());
+        Log.d("VK", "try to restore album_id: " + restore_VKAlbumId());
     }
 
     public static long restore_VKUserId(){
         return sharedPreferences.getLong(sp_key_VK_USER_ID, -1);
+    }
+
+    public static long restore_VKAlbumId(){
+        return sharedPreferences.getLong(sp_key_VK_ALBUM_ID, -1);
     }
 
     public static VKAccessToken restore_AccessToken(){
@@ -63,6 +74,15 @@ public class SharedStaticAppData {
     public static void save_VKUserId(long nuser_id){
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putLong(sp_key_VK_USER_ID, nuser_id);
+
+        editor.commit();
+    }
+
+
+    public static void save_VKAlbumId(long album_id){
+        VK_UploadAlbumId = album_id;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(sp_key_VK_ALBUM_ID, album_id);
 
         editor.commit();
     }

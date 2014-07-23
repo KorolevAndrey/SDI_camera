@@ -94,8 +94,10 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         switch (id){
             case R.id.id_btn_share_photo_vk:
                 //VKManager.WallPostPhoto(sharedPhoto);
-                //shareTask = new SharePhotoTask();
+                shareTask = new SharePhotoTask();
                 shareTask.execute();
+
+                //VKManager.UploadPhotoToAlbum(this.sharedPhoto);
                 break;
 
             case R.id.id_btn_share_cancel:
@@ -199,8 +201,12 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         protected Boolean doInBackground(Void... params) {
             Log.d("VK", "Background upload");
             if (SharedStaticAppData.isOnline()){
-                VKManager.WallPostPhoto(sharedPhoto);
-                return true;}
+                if (SharedStaticAppData.VK_UPLOAD_TO_ALBUM)
+                    VKManager.UploadPhotoToAlbum(sharedPhoto);
+                else
+                    VKManager.WallPostPhoto(sharedPhoto);
+                return true;
+            }
 
             return  false;
         }
