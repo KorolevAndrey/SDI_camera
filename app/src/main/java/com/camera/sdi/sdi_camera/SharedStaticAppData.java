@@ -3,6 +3,7 @@ package com.camera.sdi.sdi_camera;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -96,6 +97,7 @@ public class SharedStaticAppData {
                 bitmap.getWidth() , bitmap.getHeight(),
                 mtx, true);
 
+        //bitmap.recycle();
         return rotated;
     }
 

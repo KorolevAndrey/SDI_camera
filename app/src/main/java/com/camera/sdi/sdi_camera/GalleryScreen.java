@@ -71,8 +71,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
             @Override
             public void onClick(View v) {
                 Logger.Log("back to camera");
-                Intent i = new Intent(GalleryScreen.this, MainScreen.class);
-                startActivity(i);
+                finish();
+                //Intent i = new Intent(GalleryScreen.this, MainScreen.class);
+                //startActivity(i);
                 /*loadFiles(".jpg");
                 matchTableWithImageView(3);*/
             }
@@ -99,8 +100,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     }
 
     private void matchTableWithImageView(int column_count){
+        //if (1 == 1) return;
         // clear layout
-        tableLayout.removeAllViews();
+        tableLayout.removeAllViewsInLayout();
 
         // get image widthth
         int img_width = getWindowManager().getDefaultDisplay().getWidth(); //tableLayout.getWidth();
@@ -118,10 +120,13 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
             TableRow tr = new TableRow(this);
             tr.setLayoutParams(new ViewGroup.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, img_width));
             tr.setBackgroundColor(getResources().getColor(R.color.gallery_table_row_background));
+            //if (1 == 1) return;
+            BitmapFactory.Options bmp_options = new BitmapFactory.Options();
+            bmp_options.inSampleSize = 8;
             for (int j=0; j<column_count && i+j<n; ++j){
                 String path = files[i+j].getAbsolutePath();
-                Bitmap bmp = SharedStaticAppData.rotateBitmap90Degrees(BitmapFactory.decodeFile(path));
 
+                Bitmap bmp = SharedStaticAppData.rotateBitmap90Degrees(BitmapFactory.decodeFile(path,bmp_options));
                 ImageView iv = new ImageView(this);
                 iv.setLayoutParams(new ViewGroup.LayoutParams(img_width, img_width));
                 iv.setImageBitmap(bmp);
@@ -129,6 +134,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 iv.setOnClickListener(this);
 
                 tr.addView(iv, new TableRow.LayoutParams(img_width+1, img_width));
+
+                //bmp.recycle();
             }
             tableLayout.addView(tr, new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
         }
@@ -179,6 +186,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
     @Override
     protected void onDestroy() {
+        System.gc();
         VKUIHelper.onDestroy(this);
         super.onDestroy();
     }
@@ -221,7 +229,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                     }
                 }
 
-                Log.d("Internet status", "called");
+                //Log.d("Internet status", "called");
                 lastCall = System.currentTimeMillis();
                 nStatus = SharedStaticAppData.isOnline();
                 if (nStatus != isOnline){
