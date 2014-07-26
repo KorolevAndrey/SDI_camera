@@ -130,7 +130,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 ImageView iv = new ImageView(this);
                 iv.setLayoutParams(new ViewGroup.LayoutParams(img_width, img_width));
                 iv.setImageBitmap(bmp);
-                iv.setTag(files[i+j]);
+                iv.setTag(i+j);
                 iv.setOnClickListener(this);
 
                 tr.addView(iv, new TableRow.LayoutParams(img_width+1, img_width));
@@ -143,10 +143,10 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        File f = (File)v.getTag();
+        int ind = (Integer) v.getTag();
         //VKManager.WallPostPhoto(f);
 
-        VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, f);
+        VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, files, ind);
 
         vkShareDialogBox.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override

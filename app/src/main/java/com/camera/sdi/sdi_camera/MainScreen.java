@@ -260,7 +260,6 @@ public class MainScreen extends Activity implements View.OnClickListener{
         // get power manager to keep screen on
         powerManager  = (PowerManager) getSystemService(Context.POWER_SERVICE);
         this.wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "MTag");
-        this.wakeLock.acquire();
 
         // restore saved shared preferences
         VKManager.user_id = SharedStaticAppData.restore_VKUserId();
@@ -269,7 +268,6 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
     @Override
     protected void onDestroy() {
-        this.wakeLock.release();
         super.onDestroy();
         VKUIHelper.onDestroy(this);
     }
@@ -284,6 +282,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
         Log.d("debug", "camera:" + (camera == null ? " OK" : "NULL"));
         setPreviewSize(SharedStaticAppData.FULLSCREEN);
         forceCamera();
+
+        // lock screen
+        this.wakeLock.acquire();
     }
 
     @Override
@@ -300,6 +301,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
             camera.release();
         }
         camera = null;
+
+        // release screen blocker
+        this.wakeLock.release();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.camera.sdi.sdi_camera;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -8,13 +9,16 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vk.sdk.VKAccessToken;
@@ -29,11 +33,18 @@ import java.io.File;
  * Created by sdi on 21.07.14.
  */
 public class VkShareDialogBox extends Dialog implements View.OnClickListener{
-    Context context  = null;
-    Button btnShare  = null;
-    Button btnCancel = null;
-    Button btnDelete = null;
-    File sharedPhoto = null;
+    float fLastImageTouch_x;
+    float fLastImageTouch_y;
+    float fImageTouch_dx =0;
+    float fImageTouch_dy =0;
+
+    Context context       = null;
+    TextView tvImageIndex = null;
+    Button btnShare       = null;
+    Button btnCancel      = null;
+    Button btnDelete      = null;
+    File[] sharedPhotos   = null;
+    int currentSharedPhotosInd = 0;
 
     Dialog parent    = null;
 
@@ -41,17 +52,41 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
     SharePhotoTask shareTask = null;
 
     public boolean isFileExists(){
-        boolean ret = sharedPhoto.exists();
-        Log.d("Delete File", ret ? sharedPhoto.getName() + " exists" : sharedPhoto.getName() + " not exists");
+        boolean ret = false;
+        try {
+            ret = sharedPhotos[currentSharedPhotosInd].exists();
+            Log.d("Delete File", ret ? sharedPhotos[currentSharedPhotosInd].getName() + " exists" : sharedPhotos[currentSharedPhotosInd].getName() + " not exists");
+        }catch (Exception e){
+            Log.e("Touch", e.getMessage());
+        }
         return ret;
     }
 
-    public VkShareDialogBox(Context context, File bmpPhoto) {
+    /*
+    * this method called when sets actual photo in imageView.
+    * */
+    private void _refreshImageView(){
+        // set photo
+        try {
+            Bitmap bmp = BitmapFactory.decodeFile(sharedPhotos[currentSharedPhotosInd].getAbsolutePath());
+            Bitmap rotated = SharedStaticAppData.rotateBitmap90Degrees(bmp);
+            ((ImageView) findViewById(R.id.id_img_uploaded_to_vk)).setImageBitmap(rotated);
+        } catch (Exception e){}
+
+        // refresh index info in UI
+        tvImageIndex.setText((currentSharedPhotosInd+1) + " / " + sharedPhotos.length);
+
+        // called to delete "old" bitmap
+        System.gc();
+    }
+
+    public VkShareDialogBox(Context context, File[] bmpPhotos, int ind) {
         super(context);
 
         this.context = context;
-        sharedPhoto = bmpPhoto;
+        sharedPhotos = bmpPhotos;
         parent = this;
+        currentSharedPhotosInd = ind;
     }
 
     @Override
@@ -66,16 +101,73 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         btnShare    = (Button) findViewById(R.id.id_btn_share_photo_vk);
         btnCancel   = (Button) findViewById(R.id.id_btn_share_cancel);
         progressBar = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
+        tvImageIndex  = (TextView) findViewById(R.id.id_tv_image_index);
 
         // set click_listeners
         btnCancel.setOnClickListener(this);
         btnShare.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
 
-        // set photo
-        Bitmap bmp = BitmapFactory.decodeFile(sharedPhoto.getAbsolutePath());
-        Bitmap rotated = SharedStaticAppData.rotateBitmap90Degrees(bmp);
-        ((ImageView) findViewById(R.id.id_img_uploaded_to_vk)).setImageBitmap(rotated);
+        // set image in image view and bind "leaf" listener
+        _refreshImageView();
+        ((ImageView) findViewById(R.id.id_img_uploaded_to_vk)).setOnTouchListener(new View.OnTouchListener() {
+            /*
+            * this method used for leaf images
+            * */
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                float x = event.getX();
+                float y = event.getY();
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        fImageTouch_dx = 0;
+                        fImageTouch_dy = 0;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        fImageTouch_dx += fLastImageTouch_x - x;
+                        fImageTouch_dy += fLastImageTouch_y - y;
+
+                        float alpha = 1;
+                        if (fImageTouch_dx > 0){
+                            Log.d("Touch", "fImageTouch_dx: " + fImageTouch_dx + "next: " + SharedStaticAppData.IMAGE_LEAF_NEXT);
+                            alpha -= fImageTouch_dx / SharedStaticAppData.IMAGE_LEAF_NEXT;
+                        }else {
+                            Log.d("Touch", "fImageTouch_dx: " + fImageTouch_dx + "prev: " + SharedStaticAppData.IMAGE_LEAF_PREV);
+                            alpha -= fImageTouch_dx / SharedStaticAppData.IMAGE_LEAF_PREV;
+                        }
+
+                        Log.d("Touch", "alpha: " + alpha);
+                        v.setAlpha(alpha);
+
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (fImageTouch_dx > SharedStaticAppData.IMAGE_LEAF_NEXT) {
+                            // user want to leaf to the next photo
+                            // n --> 0
+                            currentSharedPhotosInd = ++currentSharedPhotosInd % sharedPhotos.length;
+                        }else if (fImageTouch_dx < SharedStaticAppData.IMAGE_LEAF_PREV){
+                            // user want to leaf to the previous photo
+                            // 0 --> n-1
+                            currentSharedPhotosInd = (--currentSharedPhotosInd + sharedPhotos.length) % sharedPhotos.length;
+                        }
+                        Log.d("Touch", "dx: " + fImageTouch_dx + " dy: "+fImageTouch_dy);
+                        Log.d("Touch", "new ind: " + currentSharedPhotosInd);
+
+                        // set new image
+                        _refreshImageView();
+
+                        // set image alpha
+                        v.setAlpha(1);
+                        break;
+                }
+
+                fLastImageTouch_x = x;
+                fLastImageTouch_y = y;
+                return true;
+            }
+        });
 
         shareTask = new SharePhotoTask();
 
@@ -108,7 +200,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
                 break;
 
             case R.id.id_btn_delete_photo:
-                DeleteFileDialogBox deleteFileDialogBox = new DeleteFileDialogBox(context, sharedPhoto);
+                DeleteFileDialogBox deleteFileDialogBox = new DeleteFileDialogBox(context, sharedPhotos[currentSharedPhotosInd]);
                 deleteFileDialogBox.show();
                 deleteFileDialogBox.setOnCancelListener(new OnCancelListener() {
                     @Override
@@ -202,9 +294,9 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
             Log.d("VK", "Background upload");
             if (SharedStaticAppData.isOnline()){
                 if (SharedStaticAppData.VK_UPLOAD_TO_ALBUM)
-                    VKManager.UploadPhotoToAlbum(sharedPhoto);
+                    VKManager.UploadPhotoToAlbum(sharedPhotos[currentSharedPhotosInd]);
                 else
-                    VKManager.WallPostPhoto(sharedPhoto);
+                    VKManager.WallPostPhoto(sharedPhotos[currentSharedPhotosInd]);
                 return true;
             }
 
