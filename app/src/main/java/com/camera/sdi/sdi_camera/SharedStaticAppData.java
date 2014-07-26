@@ -20,8 +20,8 @@ public class SharedStaticAppData {
     // finals block
     public static final int     CAMERA_ID  = 0;
     public static final boolean FULLSCREEN = true;
-    public static final int     IMAGE_LEAF_NEXT = 175;
-    public static final int     IMAGE_LEAF_PREV = -175;
+    public static final int     IMAGE_LEAF_NEXT = 200;
+    public static final int     IMAGE_LEAF_PREV = -200;
     // end of finals block
     //--------------------
 

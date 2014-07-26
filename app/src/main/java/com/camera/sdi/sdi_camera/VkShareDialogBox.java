@@ -38,11 +38,13 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
     float fImageTouch_dx =0;
     float fImageTouch_dy =0;
 
-    Context context       = null;
-    TextView tvImageIndex = null;
-    Button btnShare       = null;
-    Button btnCancel      = null;
-    Button btnDelete      = null;
+    Context context              = null;
+    TextView tvImageIndex        = null;
+    Button btnShare              = null;
+    Button btnCancel             = null;
+    Button btnDelete             = null;
+    ScrollPowerView spvPower     = null;
+
     File[] sharedPhotos   = null;
     int currentSharedPhotosInd = 0;
 
@@ -97,16 +99,20 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         setContentView(R.layout.dialog_vk_share);
 
         // assign UI
-        btnDelete   = (Button) findViewById(R.id.id_btn_delete_photo);
-        btnShare    = (Button) findViewById(R.id.id_btn_share_photo_vk);
-        btnCancel   = (Button) findViewById(R.id.id_btn_share_cancel);
-        progressBar = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
-        tvImageIndex  = (TextView) findViewById(R.id.id_tv_image_index);
+        btnDelete    = (Button) findViewById(R.id.id_btn_delete_photo);
+        btnShare     = (Button) findViewById(R.id.id_btn_share_photo_vk);
+        btnCancel    = (Button) findViewById(R.id.id_btn_share_cancel);
+        progressBar  = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
+        tvImageIndex = (TextView) findViewById(R.id.id_tv_image_index);
+        spvPower     = (ScrollPowerView) findViewById(R.id.id_spv_scroll_power);
 
         // set click_listeners
         btnCancel.setOnClickListener(this);
         btnShare.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
+
+        // set edges
+        spvPower.setBothVal(SharedStaticAppData.IMAGE_LEAF_PREV, SharedStaticAppData.IMAGE_LEAF_NEXT);
 
         // set image in image view and bind "leaf" listener
         _refreshImageView();
@@ -160,8 +166,15 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
                         // set image alpha
                         v.setAlpha(1);
+
+                        // reset animation
+                        fImageTouch_dx = 0;
+                        fImageTouch_dy = 0;
+
                         break;
                 }
+
+                spvPower.setCurrentVal((int)fImageTouch_dx);
 
                 fLastImageTouch_x = x;
                 fLastImageTouch_y = y;

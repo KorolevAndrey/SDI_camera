@@ -61,4 +61,11 @@
         android:layout_alignParentBottom="true"
         android:text="1/10"/>
 
+    <com.camera.sdi.sdi_camera.ScrollPowerView
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/id_spv_scroll_power"
+        android:layout_toLeftOf="@+id/id_tv_image_index"/>
+
 </RelativeLayout>
