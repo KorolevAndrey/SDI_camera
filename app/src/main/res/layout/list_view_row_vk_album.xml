@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/id_lvr_vk_album_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textColor="@color/vk_white"
+        android:text="@string/vk_default_album_name"
+        android:layout_gravity="left"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/id_lvr_vk_album_id"
+        android:paddingTop="5dp"
+        android:layout_gravity="right"
+        android:textColor="@color/vk_white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="123456789"
+        android:textSize="10sp"/>
+
+</LinearLayout>

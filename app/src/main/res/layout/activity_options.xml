@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="VK.com album to upload:"
+            android:textSize="15sp"
+            android:textColor="@color/vk_white"
+            android:layout_alignParentLeft="true"/>
+
+        <TextView
+            android:layout_toLeftOf="@+id/id_options_vk_albumName_change"
+            android:layout_centerVertical="true"
+            android:paddingLeft="15dp"
+            android:textSize="15sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_options_tvVKAlbum"
+            android:textColor="@color/vk_white"
+            android:text="@string/vk_default_album_name"/>
+
+        <Button
+            android:layout_marginLeft="10dp"
+            android:paddingTop="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_options_vk_albumName_change"
+            android:text="..."
+            android:layout_alignParentRight="true"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

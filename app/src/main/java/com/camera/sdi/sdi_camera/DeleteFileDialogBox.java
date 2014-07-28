@@ -3,6 +3,7 @@ package com.camera.sdi.sdi_camera;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ public class DeleteFileDialogBox extends Dialog implements View.OnClickListener 
     public DeleteFileDialogBox(Context context, File fileToDelete) {
         super(context);
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_delete_file);
 
         this.fileToDelete = fileToDelete;

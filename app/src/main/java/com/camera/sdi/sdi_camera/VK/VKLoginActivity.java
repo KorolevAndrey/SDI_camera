@@ -1,9 +1,8 @@
-package com.camera.sdi.sdi_camera;
+package com.camera.sdi.sdi_camera.VK;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +10,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.camera.sdi.sdi_camera.GalleryScreen;
+import com.camera.sdi.sdi_camera.R;
+import com.camera.sdi.sdi_camera.SharedStaticAppData;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKSdk;
@@ -23,6 +25,8 @@ import com.vk.sdk.api.VKError;
  */
 public class VKLoginActivity extends Activity {
     final static String sTokenKey = "VK_ACCESS_TOKEN_KEY";
+    public static String getTokenKey(){return sTokenKey;}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

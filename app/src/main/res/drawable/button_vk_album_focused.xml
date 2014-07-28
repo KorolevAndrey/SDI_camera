@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <corners android:radius="12px"/>
+
+    <gradient
+        android:startColor="@color/color_gradient_button_focused_start"
+        android:endColor="@color/color_gradient_button_focused_end"
+        android:angle="90"
+        android:type="linear"/>
+
+    <padding
+        android:bottom="2dp"
+        android:top="2dp"
+        android:left="2dp"
+        android:right="2dp" />
+
+</shape>

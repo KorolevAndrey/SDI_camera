@@ -1,4 +1,4 @@
-package com.camera.sdi.sdi_camera;
+package com.camera.sdi.sdi_camera.VK;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +8,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Pair;
 
+import com.camera.sdi.sdi_camera.SharedStaticAppData;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
@@ -34,6 +36,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sdi on 21.07.14.
@@ -45,6 +49,13 @@ public class VKManager {
 
     public static String token     = "VK Access token is undef";
     public static String[] scopes  = new String[]{VKScope.WALL, VKScope.PHOTOS};
+
+
+    public interface getVKAlbumsCallback{
+        void onGetAlbums( List< Pair<Long, String> >  albums);
+    }
+
+    public static getVKAlbumsCallback onGetVKAlbums = null;
 
     public static boolean WallPostPhoto(File photo){
         /*
@@ -187,7 +198,7 @@ public class VKManager {
                 public void onComplete(VKResponse response) {
                     try {
                         JSONObject root = response.json.getJSONObject("response");
-                        JSONArray items = response.json.getJSONArray("items");
+                        JSONArray items = root.getJSONArray("items");
                         int count = root.getInt("count");
                         boolean found = false;
                         for (int i=0;i<count; ++i){
@@ -232,4 +243,42 @@ public class VKManager {
             }
         });
     }
+
+    /*
+    * get albums from vk.com and call getVKAlbum callback to process it
+    *
+    * */
+    public static void getVKAlbums(){
+        VKRequest request = new VKRequest("photos.getAlbums");
+        request.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                try {
+                    List<Pair<Long, String> > albums = new ArrayList<Pair<Long, String>>();
+
+                    // parse result (user albums)
+                    JSONObject root = response.json.getJSONObject("response");
+                    JSONArray items = root.getJSONArray("items");
+                    int count = root.getInt("count");
+                    for (int i=0;i<count; ++i){
+                        JSONObject item = items.getJSONObject(i);
+                        long id = item.getLong("id");
+                        String title = item.getString("title");
+
+                        Log.d("VK", "album found: "+title+" ["+id+"]");
+
+                        albums.add(new Pair(id, title));
+                    }
+
+                    // call callback if set
+                    if (onGetVKAlbums != null)
+                        onGetVKAlbums.onGetAlbums(albums);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 }

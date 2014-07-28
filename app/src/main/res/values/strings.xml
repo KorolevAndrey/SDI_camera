@@ -10,8 +10,21 @@
     <string name="internet_status_online">online</string>
     <string name="internet_status_offline">offline</string>
 
+    <string name="vk_default_album_name">SDI_camera</string>
+
     <color name="color_status_offline">#dd3131</color>
     <color name="color_status_online">#31dd31</color>
     <color name="main_screen_background">#333333</color>
     <color name="gallery_table_row_background">#999999</color>
+
+    <color name="color_gradient_button_focused_end">#4411bb</color>
+    <color name="color_gradient_button_focused_start">#1144ff</color>
+
+    <color name="color_gradient_button_normal_end">#7755ff</color>
+    <color name="color_gradient_button_normal_start">#ffffff</color>
+
+    <color name="color_gradient_button_pressed_end">#55ff55</color>
+    <color name="color_gradient_button_pressed_start">#ffffff</color>
+
+    <color name="color_btn_text">#333333</color>
 </resources>

@@ -1,8 +1,22 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.Base.AppCompat.Light">
         <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/main_screen_background</item>
+        <item name="android:buttonStyle">@style/ButtonTheme</item>
+    </style>
+
+    <style name="ButtonTheme" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">@color/color_btn_text</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="VKAlbumSelectButtonStyle" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button_vk_album</item>
+        <item name="android:textColor">@color/color_btn_text</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>

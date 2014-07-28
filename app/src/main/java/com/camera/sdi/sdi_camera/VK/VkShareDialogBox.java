@@ -1,11 +1,10 @@
-package com.camera.sdi.sdi_camera;
+package com.camera.sdi.sdi_camera.VK;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -21,6 +20,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.camera.sdi.sdi_camera.DeleteFileDialogBox;
+import com.camera.sdi.sdi_camera.R;
+import com.camera.sdi.sdi_camera.ScrollPowerView;
+import com.camera.sdi.sdi_camera.SharedStaticAppData;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKSdk;

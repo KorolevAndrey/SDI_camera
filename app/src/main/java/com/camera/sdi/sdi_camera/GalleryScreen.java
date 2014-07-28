@@ -1,19 +1,12 @@
 package com.camera.sdi.sdi_camera;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.text.LoginFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,15 +19,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
+import com.camera.sdi.sdi_camera.VK.VkShareDialogBox;
 import com.vk.sdk.VKAccessToken;
-import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
-import com.vk.sdk.api.VKApi;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Created by sdi on 18.07.14.
@@ -64,7 +55,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         tvOnlineStatus = (TextView) findViewById(R.id.id_tv_online_status);
         tableLayout = ((TableLayout) findViewById(R.id.id_tl_gallery_table));
         //if (VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).isExpired())
-        Log.d("VK", "token: " + VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).accessToken);
+        Log.d("VK", "token: " + VKAccessToken.tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey()).accessToken);
 
         Button btn = ((Button) findViewById(R.id.id_btn_refresh_gallery));
         btn.setOnClickListener(new View.OnClickListener() {
@@ -180,8 +171,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         super.onPause();
 
         Log.d("Internet status", "onPause");
-        /*SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
-        internetStatusChecker.cancel(true);*/
+        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
+        internetStatusChecker.cancel(true);
     }
 
     @Override
@@ -197,9 +188,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         VKUIHelper.onResume(this);
 
         Log.d("Internet status", "onResume");
-        /*SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
+        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
         internetStatusChecker = new RefreshInternetConnectionStatus();
-        internetStatusChecker.execute();*/
+        internetStatusChecker.execute();
     }
 
     @Override
@@ -207,7 +198,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         super.onActivityResult(requestCode, resultCode, data);
         VKUIHelper.onActivityResult(requestCode, resultCode, data);
         Toast.makeText( this,
-                VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).accessToken,
+                VKAccessToken.tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey()).accessToken,
                 Toast.LENGTH_SHORT).show();
     }
 
