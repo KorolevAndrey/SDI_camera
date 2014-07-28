@@ -309,10 +309,11 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         protected Boolean doInBackground(Void... params) {
             Log.d("VK", "Background upload");
             if (SharedStaticAppData.isOnline()){
-                if (SharedStaticAppData.VK_UPLOAD_TO_ALBUM)
+                if (SharedStaticAppData.isUploadToVKAlbum())
                     VKManager.UploadPhotoToAlbum(sharedPhotos[currentSharedPhotosInd]);
                 else
                     VKManager.WallPostPhoto(sharedPhotos[currentSharedPhotosInd]);
+
                 return true;
             }
 

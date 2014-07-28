@@ -149,7 +149,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
             Log.d("debug", "pressed");
             try {
                 Logger.Log("try to make shot");
-                makeShot();
+                autoFocusMakeShot();
+                //makeShot();
+
                 /*Log.d("debug", "getExternalStorageDirectory: " + Environment.getExternalStorageDirectory().getAbsolutePath());
                 Log.d("debug", "getDataDirectory: " + Environment.getDataDirectory().getAbsolutePath());
                 if (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).exists()){
@@ -172,7 +174,34 @@ public class MainScreen extends Activity implements View.OnClickListener{
         return super.onKeyDown(keyCode, event);
     }
 
-    private void makeShot(){
+    private void autoFocusMakeShot(){
+        if (camera == null) {
+            Log.d("Camera", "camera is null (from autoFocusMakeShot)");
+            return;
+        }
+
+        camera.autoFocus(new Camera.AutoFocusCallback() {
+            @Override
+            public void onAutoFocus(boolean success, Camera camera) {
+                Log.d("Camera", success ? " autofocus success" : "autofocus fail");
+                if (success)
+                camera.takePicture(null, null, new Camera.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+                        // save picture
+                        //Logger.Log("[no autofocus] try to save photo");
+                        File pictures_dir = SharedStaticAppData.getBaseDir();
+                        Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
+                        CameraManager cm = new CameraManager(pictures_dir);
+                        Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
+                        forceCamera();
+                    }
+                });
+            }
+        });
+    }
+
+    /*private void makeShot(){
         if (camera == null)
             Logger.Log("camera is null");
         else
@@ -219,7 +248,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
             });
         }
     }
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -304,7 +333,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_screen, menu);
+        //getMenuInflater().inflate(R.menu.main_screen, menu);
         return true;
     }
 

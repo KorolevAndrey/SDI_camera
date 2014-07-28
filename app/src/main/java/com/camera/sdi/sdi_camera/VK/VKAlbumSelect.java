@@ -60,7 +60,11 @@ public class VKAlbumSelect extends Activity implements AdapterView.OnItemClickLi
 
                 // display albums
                 itemsInList = albums;
-                adapter = new VKAlbumsListAdapter(getBaseContext(), R.layout.list_view_row_vk_album, albums);
+                adapter = new VKAlbumsListAdapter(
+                        getBaseContext(),
+                        R.layout.list_view_row_vk_album, albums
+                );
+
                 lvAlbums.setAdapter(adapter);
             }
         };
@@ -77,6 +81,15 @@ public class VKAlbumSelect extends Activity implements AdapterView.OnItemClickLi
             @Override
             public void onClick(View v) {
                 VKManager.getVKAlbums();
+            }
+        });
+
+        ((Button) findViewById(R.id.id_btn_post_on_wall)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // share via wall-post
+                SharedStaticAppData.saveUploadTarget( SharedStaticAppData.UPLOAD_TARGET_WALL );
+                finish();
             }
         });
     }
@@ -156,8 +169,17 @@ public class VKAlbumSelect extends Activity implements AdapterView.OnItemClickLi
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         long nAlbumId = itemsInList.get(position).first;
+        String nAlbumName = itemsInList.get(position).second;
+
         Log.d("VK", "new album id" + nAlbumId);
+        Log.d("VK", "new album name: " + nAlbumName);
+
         SharedStaticAppData.save_VKAlbumId(nAlbumId);
+        SharedStaticAppData.save_VKAlbumName(nAlbumName);
+
+        SharedStaticAppData.saveUploadTarget(SharedStaticAppData.UPLOAD_TARGET_ALBUM);
+
+        finish();
     }
 
     private class VKAlbumsListAdapter extends ArrayAdapter<Pair<Long, String > >{

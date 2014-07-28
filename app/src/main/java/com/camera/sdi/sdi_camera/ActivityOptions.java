@@ -7,6 +7,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.VK.VKAlbumSelect;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ActivityOptions extends Activity {
 
     Button btnSelectAlbum = null;
+    TextView tvVKUploadAlbumName = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,12 @@ public class ActivityOptions extends Activity {
 
         VKUIHelper.onCreate(this);
 
+        // restore saved data
+        boolean res = SharedStaticAppData.restore_VKUploadTarget();
+        _setVKUploadTarget(res);
+
+        tvVKUploadAlbumName = (TextView) findViewById(R.id.id_options_tvVKAlbum);
+
         btnSelectAlbum = (Button) findViewById(R.id.id_options_vk_albumName_change);
         btnSelectAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,6 +46,33 @@ public class ActivityOptions extends Activity {
                 startActivity(i);
             }
         });
+    }
+
+    private void _setVKUploadTarget(boolean isToAlbum){
+        if (tvVKUploadAlbumName == null) return;
+
+        if (isToAlbum){
+            // set album name
+            String uploadAlbumTitle = SharedStaticAppData.restore_VKAlbumTitle();
+            Log.d("VK", "photo must be saved to : " + uploadAlbumTitle);
+            tvVKUploadAlbumName.setText(uploadAlbumTitle);
+        } else{
+            // upload to wall
+            Log.d("VK", "upload to wall");
+            tvVKUploadAlbumName.setText(getResources().getString(R.string.upload_target_wall));
+        }
+    }
+
+    private void _setVKUploadTarget(){
+        boolean isToAlbum = SharedStaticAppData.restore_VKUploadTarget();
+        _setVKUploadTarget(isToAlbum);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        _setVKUploadTarget();
     }
 
     @Override

@@ -4,11 +4,28 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="load albums"
-        android:id="@+id/id_btn_load_vk_albums"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_marginTop="5dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="load albums"
+            android:id="@+id/id_btn_load_vk_albums"/>
+
+        <Button
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/id_btn_load_vk_albums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="post on wall"
+            android:id="@+id/id_btn_post_on_wall"/>
+
+    </RelativeLayout>
 
     <ListView
         android:id="@+id/id_lv_vk_albums"

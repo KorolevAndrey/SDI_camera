@@ -10,25 +10,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
+        <LinearLayout
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="VK.com album to upload:"
-            android:textSize="15sp"
-            android:textColor="@color/vk_white"
-            android:layout_alignParentLeft="true"/>
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_toLeftOf="@+id/id_options_vk_albumName_change"
-            android:layout_centerVertical="true"
-            android:paddingLeft="15dp"
-            android:textSize="15sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/id_options_tvVKAlbum"
-            android:textColor="@color/vk_white"
-            android:text="@string/vk_default_album_name"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VK.com album to upload:"
+                android:textSize="15sp"
+                android:textColor="@color/vk_white"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/id_options_tvVKAlbum_static_text"/>
+
+            <TextView
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/id_options_tvVKAlbum"
+                android:textColor="@color/vk_white"
+                android:text="@string/vk_default_album_name"/>
+
+
+        </LinearLayout>
 
         <Button
             android:layout_marginLeft="10dp"

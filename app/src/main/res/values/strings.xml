@@ -7,8 +7,12 @@
     <string name="shared_preferences_tag">MySharedPrefTag</string>
     <string name="sp_long_vk_user_id">VK_USER_ID</string>
     <string name="sp_long_vk_album_id">VK_ALBUM_ID</string>
+    <string name="sp_long_vk_album_title">VK_ALBUM_TITLE</string>
+    <string name="sp_boolean_vk_upload_target">VK_UPLOAD_TARGET</string>
     <string name="internet_status_online">online</string>
     <string name="internet_status_offline">offline</string>
+
+    <string name="upload_target_wall">wall</string>
 
     <string name="vk_default_album_name">SDI_camera</string>
 
