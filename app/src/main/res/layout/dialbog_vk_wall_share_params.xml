@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    style="@style/AppTheme"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:paddingTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/id_et_wall_post_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="3"
+            android:maxLines="3"
+            android:text="@string/str_base_vk_wall_description"/>
+
+        <RadioGroup
+            android:id="@+id/id_vk_wall_post_rg_privacy"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/id_et_wall_post_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/id_rb_vk_wall_post_privacy_public"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/str_base_vk_wall_privacy_public"
+                android:checked="true"/>
+
+
+            <RadioButton
+                android:id="@+id/id_rb_vk_wall_post_privacy_friends_only"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/str_base_vk_wall_privacy_friends_only"/>
+
+        </RadioGroup>
+
+        <Button
+            style="@style/ButtonTheme"
+            android:layout_below="@+id/id_vk_wall_post_rg_privacy"
+            android:id="@+id/id_btn_vk_wall_share"
+            android:text="@string/str_base_vk_wall_btn_text_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:layout_below="@+id/id_vk_wall_post_rg_privacy"
+            style="@style/ButtonTheme"
+            android:layout_marginLeft="10dp"
+            android:text="cancel"
+            android:id="@+id/id_dialog_vk_wall_post_params_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"/>
+
+        <ProgressBar
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="10dp"
+            android:layout_alignBottom="@+id/id_vk_wall_post_rg_privacy"
+            android:layout_toRightOf="@+id/id_vk_wall_post_rg_privacy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_pb_vk_wall_post_upload" />
+    </RelativeLayout>
+
+</LinearLayout>

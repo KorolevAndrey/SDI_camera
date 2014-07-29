@@ -202,9 +202,22 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         switch (id){
             case R.id.id_btn_share_photo_vk:
                 //VKManager.WallPostPhoto(sharedPhoto);
-                shareTask = new SharePhotoTask();
-                shareTask.execute();
-
+                if (SharedStaticAppData.isUploadToVKAlbum()) {
+                    shareTask = new SharePhotoTask();
+                    shareTask.execute();
+                } else {
+                    // call wall post dialog
+                    Dialog dialogWallPostParams = new VKWallPostDialogBox(this.getContext(),
+                            sharedPhotos[currentSharedPhotosInd]
+                    );
+                    dialogWallPostParams.setOnDismissListener(new OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            dismiss();
+                        }
+                    });
+                    dialogWallPostParams.show();
+                }
                 //VKManager.UploadPhotoToAlbum(this.sharedPhoto);
                 break;
 
@@ -311,8 +324,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
             if (SharedStaticAppData.isOnline()){
                 if (SharedStaticAppData.isUploadToVKAlbum())
                     VKManager.UploadPhotoToAlbum(sharedPhotos[currentSharedPhotosInd]);
-                else
-                    VKManager.WallPostPhoto(sharedPhotos[currentSharedPhotosInd]);
+               //VKManager.WallPostPhoto(sharedPhotos[currentSharedPhotosInd]);
 
                 return true;
             }

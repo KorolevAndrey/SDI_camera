@@ -57,7 +57,7 @@ public class VKManager {
 
     public static getVKAlbumsCallback onGetVKAlbums = null;
 
-    public static boolean WallPostPhoto(File photo){
+    public static boolean WallPostPhoto(File photo, final String message, final boolean friendsOnly){
         /*
         * загрузка фото на стену. 0 если не на страницу группы
         * */
@@ -76,7 +76,7 @@ public class VKManager {
 
                 // фото на серве. Todo: wallpost [completed]
                 VKApiPhoto photoModel = ((VKPhotoArray) response.parsedModel).get(0);
-                makePost(new VKAttachments(photoModel));
+                makePost(new VKAttachments(photoModel), message, friendsOnly);
             }
 
             @Override
@@ -222,12 +222,13 @@ public class VKManager {
     }
 
     private static void makePost(VKAttachments vkApiAttachments) {
-        makePost(vkApiAttachments, null);
+        makePost(vkApiAttachments, null, false);
     }
-    private static void makePost(VKAttachments vkApiAttachments, String strMessage) {
+    private static void makePost(VKAttachments vkApiAttachments, String strMessage, boolean friendsOnly) {
         String strOwnerId = Long.toString(user_id); // long to string
         VKRequest post = VKApi.wall().post(VKParameters.from(
                 VKApiConst.OWNER_ID    , strOwnerId,        // user_id
+                VKApiConst.FRIENDS_ONLY,(friendsOnly?1:0),  // privacy
                 VKApiConst.ATTACHMENTS , vkApiAttachments,  // params
                 VKApiConst.MESSAGE     , strMessage));      // message if not null
         post.setModelClass(VKWallPostResult.class);         // WTF ? O_o

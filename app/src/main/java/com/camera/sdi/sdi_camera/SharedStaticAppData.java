@@ -61,7 +61,7 @@ public class SharedStaticAppData {
         Log.d("VK", "try to restore album_id: " + restore_VKAlbumId());
     }
 
-    public static boolean isUploadToVKAlbum(){ return VK_UPLOAD_TO_ALBUM;}
+    public static boolean isUploadToVKAlbum(){ return restore_VKUploadTarget();}
     public static void saveUploadTarget(boolean isUploadToVKAlbum){
         VK_UPLOAD_TO_ALBUM = isUploadToVKAlbum;
         SharedPreferences.Editor editor = sharedPreferences.edit();

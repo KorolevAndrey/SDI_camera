@@ -12,6 +12,11 @@
     <string name="internet_status_online">online</string>
     <string name="internet_status_offline">offline</string>
 
+    <string name="str_base_vk_wall_description">description</string>
+    <string name="str_base_vk_wall_btn_text_share">share</string>
+    <string name="str_base_vk_wall_privacy_public">all users</string>
+    <string name="str_base_vk_wall_privacy_friends_only">friends only</string>
+
     <string name="upload_target_wall">wall</string>
 
     <string name="vk_default_album_name">SDI_camera</string>
