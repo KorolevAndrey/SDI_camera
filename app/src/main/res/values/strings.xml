@@ -17,6 +17,11 @@
     <string name="str_base_vk_wall_privacy_public">all users</string>
     <string name="str_base_vk_wall_privacy_friends_only">friends only</string>
 
+    <string name="str_instagram_user_name">User Name: </string>
+    <string name="str_instagram_email">E-Mail</string>
+    <string name="str_instagram_password">Password</string>
+    <string name="str_instagram_repeat_password">Repeat password</string>
+
     <string name="upload_target_wall">wall</string>
 
     <string name="vk_default_album_name">SDI_camera</string>

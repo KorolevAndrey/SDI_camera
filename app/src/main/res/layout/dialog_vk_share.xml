@@ -39,6 +39,14 @@
 
         <Button
             style="@style/ButtonTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_btn_share_instagram"
+            android:text="Instagram"
+            android:layout_margin="5px"/>
+
+        <Button
+            style="@style/ButtonTheme"
             android:layout_margin="5px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

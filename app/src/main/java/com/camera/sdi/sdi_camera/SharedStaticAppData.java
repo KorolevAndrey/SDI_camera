@@ -22,6 +22,15 @@ public class SharedStaticAppData {
     public static final boolean FULLSCREEN = true;
     public static final int     IMAGE_LEAF_NEXT = 200;
     public static final int     IMAGE_LEAF_PREV = -200;
+
+    public static final String  INSTAGRAM_CLIENT_ID = "287def6f47d74fdeab8492d4d638c94e";
+    public static final String  INSTAGRAM_CLIENT_SECRET = "cc77e5826bbc4e10b6ba3477fb1ac056";
+    public static final String  INSTAGRAM_WEBSITE_URL = "https://example.com";
+    public static final String  INSTAGRAM_REDIRECT_URL = "https://example.com";
+    public static final String  INSTAGRAM_AUTHURL = "https://api.instagram.com/oauth/authorize/";
+    public static final String  INSTAGRAM_TOKENURL = "https://api.instagram.com/oauth/access_token/";
+    public static final String  INSTAGRAM_APIURL = "https://api.instagram.com/v1";
+    public static final String  INSTAGRAM_CALLBACKURL = "https://example.com";
     // end of finals block
     //--------------------
 
@@ -46,6 +55,25 @@ public class SharedStaticAppData {
     private static String sp_key_VK_ALBUM_ID     = ""; // shared preferences album to upload photo (album_id)
     private static String sp_key_VK_ALBUM_TITLE  = ""; // shared preferences album to upload photo (album_title)
     private static String sp_key_VK_UPLOAD_TARGET= ""; // shared preferences album to upload target (wall or album)
+
+    private static String sp_key_INSTAGRAM_TOKEN = ""; // shared preferences instagram oauth token
+
+    private static String INSTAGRAM_ACCESS_TOKEN = "";
+
+    public static String restore_InstagramAccessToken(){
+        INSTAGRAM_ACCESS_TOKEN = sharedPreferences.getString(
+                sp_key_INSTAGRAM_TOKEN,
+                ""
+        );
+        return INSTAGRAM_ACCESS_TOKEN;
+    }
+
+    public static void save_InstagramAccessToken(String token){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(sp_key_INSTAGRAM_TOKEN, token);
+
+        editor.commit();
+    }
 
     public SharedStaticAppData(Context context){
         this.context = context;

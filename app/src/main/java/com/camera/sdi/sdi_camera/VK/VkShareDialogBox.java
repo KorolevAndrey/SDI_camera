@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.DeleteFileDialogBox;
+import com.camera.sdi.sdi_camera.Instagram.InstagramPhotoShare;
 import com.camera.sdi.sdi_camera.R;
 import com.camera.sdi.sdi_camera.ScrollPowerView;
 import com.camera.sdi.sdi_camera.SharedStaticAppData;
@@ -43,9 +44,10 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
     Context context              = null;
     TextView tvImageIndex        = null;
-    Button btnShare              = null;
+    Button btnShareVK            = null;
     Button btnCancel             = null;
     Button btnDelete             = null;
+    Button btnShareInstagram     = null;
     ScrollPowerView spvPower     = null;
 
     File[] sharedPhotos   = null;
@@ -103,15 +105,17 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
         // assign UI
         btnDelete    = (Button) findViewById(R.id.id_btn_delete_photo);
-        btnShare     = (Button) findViewById(R.id.id_btn_share_photo_vk);
+        btnShareVK     = (Button) findViewById(R.id.id_btn_share_photo_vk);
         btnCancel    = (Button) findViewById(R.id.id_btn_share_cancel);
         progressBar  = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
         tvImageIndex = (TextView) findViewById(R.id.id_tv_image_index);
         spvPower     = (ScrollPowerView) findViewById(R.id.id_spv_scroll_power);
+        btnShareInstagram = (Button) findViewById(R.id.id_btn_share_instagram);
 
         // set click_listeners
         btnCancel.setOnClickListener(this);
-        btnShare.setOnClickListener(this);
+        btnShareVK.setOnClickListener(this);
+        btnShareInstagram.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
 
         // set edges
@@ -226,6 +230,15 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
                     shareTask.cancel(true); // true == may interrupt if running
 
                 dismiss();
+                break;
+
+            case R.id.id_btn_share_instagram:
+                Dialog instagramDialogRegistraion = new InstagramPhotoShare(
+                        getContext(),
+                        sharedPhotos[currentSharedPhotosInd]
+                );
+
+                instagramDialogRegistraion.show();
                 break;
 
             case R.id.id_btn_delete_photo:
