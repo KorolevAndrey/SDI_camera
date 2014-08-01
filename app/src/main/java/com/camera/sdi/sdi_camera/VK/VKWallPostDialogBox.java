@@ -3,6 +3,7 @@ package com.camera.sdi.sdi_camera.VK;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -61,7 +62,11 @@ public class VKWallPostDialogBox extends Dialog implements View.OnClickListener{
         switch (id){
             case R.id.id_btn_vk_wall_share:
                 wallPostTask = new SharePhotoTask();
-                wallPostTask.execute();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                    wallPostTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                else
+                    wallPostTask.execute();
+
                 break;
             case R.id.id_dialog_vk_wall_post_params_cancel:
                 if (wallPostTask.isCancelled() == false)

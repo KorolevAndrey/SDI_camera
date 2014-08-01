@@ -1,13 +1,17 @@
 package com.camera.sdi.sdi_camera;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,9 +25,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.camera.sdi.sdi_camera.Instagram.InstagramPhotoShare;
 import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
+import com.camera.sdi.sdi_camera.VK.VKManager;
+import com.camera.sdi.sdi_camera.VK.VKWallPostDialogBox;
 import com.camera.sdi.sdi_camera.VK.VkShareDialogBox;
 import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
 
 import java.io.File;
@@ -33,10 +41,19 @@ import java.io.FilenameFilter;
  * Created by sdi on 18.07.14.
  */
 public class GalleryScreen extends Activity implements View.OnClickListener{
+
+    final static int CONTEXT_MENU_VK_SHARE = 1;
+    final static int CONTEXT_MENU_INSTAGRAM_SHARE = 2;
+    final static int CONTEXT_MENU_FILE_DELETE = 3;
+
     TableLayout tableLayout = null;
     File[] files = null;
     DebugLogger Logger = null;
     TextView tvOnlineStatus = null;
+
+    int currentFileIndex = 0;
+
+    SharePhotoTask shareTask = null;
 
     RefreshInternetConnectionStatus internetStatusChecker = null;
 
@@ -76,7 +93,10 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         tvOnlineStatus = (TextView) findViewById(R.id.id_tv_online_status);
         tableLayout = ((TableLayout) findViewById(R.id.id_tl_gallery_table));
         //if (VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).isExpired())
-        Log.d("VK", "token: " + VKAccessToken.tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey()).accessToken);
+        Log.d("VK", "token: " + VKAccessToken
+                        .tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey())
+                        .accessToken
+        );
 
         Button btn = ((Button) findViewById(R.id.id_btn_refresh_gallery));
         btn.setOnClickListener(new View.OnClickListener() {
@@ -130,7 +150,10 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         int n = files.length;
         for (int i=0; i<n && column_count > 0; i+=column_count){
             TableRow tr = new TableRow(this);
-            tr.setLayoutParams(new ViewGroup.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, img_width));
+            tr.setLayoutParams(new ViewGroup.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT, img_width)
+            );
+
             tr.setBackgroundColor(getResources().getColor(R.color.gallery_table_row_background));
             //if (1 == 1) return;
             BitmapFactory.Options bmp_options = new BitmapFactory.Options();
@@ -138,7 +161,10 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
             for (int j=0; j<column_count && i+j<n; ++j){
                 String path = files[i+j].getAbsolutePath();
 
-                Bitmap bmp = SharedStaticAppData.rotateBitmap90Degrees(BitmapFactory.decodeFile(path,bmp_options));
+                Bitmap bmp = SharedStaticAppData.rotateBitmap90Degrees(
+                        BitmapFactory.decodeFile(path,bmp_options)
+                );
+
                 ImageView iv = new ImageView(this);
                 iv.setLayoutParams(new ViewGroup.LayoutParams(img_width, img_width));
                 iv.setImageBitmap(bmp);
@@ -147,10 +173,119 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
                 tr.addView(iv, new TableRow.LayoutParams(img_width+1, img_width));
 
+                registerForContextMenu(iv);
+                iv.setOnCreateContextMenuListener(this);
                 //bmp.recycle();
             }
-            tableLayout.addView(tr, new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
+            tableLayout.addView( tr,
+                    new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                            TableLayout.LayoutParams.WRAP_CONTENT)
+            );
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+        try{ this.currentFileIndex = (Integer) v.getTag();} catch (Exception e ){};
+
+        menu.add(0, CONTEXT_MENU_VK_SHARE,
+                0, getBaseContext().getString(R.string.str_context_menu_field_vk_share)
+        );
+        menu.add(0, CONTEXT_MENU_INSTAGRAM_SHARE,
+                 0, getBaseContext().getString(R.string.str_context_menu_field_instagram_share)
+        );
+        menu.add(1, CONTEXT_MENU_FILE_DELETE,
+                 0, getBaseContext().getString(R.string.str_context_menu_field_delete_file)
+        );
+
+        for (int i=0; i<3; ++i)
+            menu.getItem(i).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()){
+                        case CONTEXT_MENU_VK_SHARE:
+                            if (SharedStaticAppData.isOnline() == false) {
+                                Toast.makeText(GalleryScreen.this,
+                                        "check your internet connection",
+                                        Toast.LENGTH_LONG)
+                                        .show();
+                                return true;
+                            }
+
+                            // init vk.com before first use.
+                            VKManager.InitVk();
+
+                            if (SharedStaticAppData.isUploadToVKAlbum()) {
+                                shareTask = new SharePhotoTask();
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                                    shareTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                else
+                                    shareTask.execute();
+
+                            } else {
+                                // call wall post dialog
+                                Dialog dialogWallPostParams = new VKWallPostDialogBox(
+                                        GalleryScreen.this,
+                                        files[currentFileIndex]
+                                );
+                                dialogWallPostParams.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        Toast.makeText(GalleryScreen.this, "posted to wall",
+                                                Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                dialogWallPostParams.show();
+                            }
+
+                            return true;
+
+                        case CONTEXT_MENU_INSTAGRAM_SHARE:
+                            if (SharedStaticAppData.isOnline() == false) {
+                                Toast.makeText(GalleryScreen.this,
+                                        "check your internet connection",
+                                        Toast.LENGTH_LONG)
+                                        .show();
+                                return true;
+                            }
+
+                            Dialog instagramDialogRegistraion = new InstagramPhotoShare(
+                                    GalleryScreen.this,
+                                    files[currentFileIndex]
+                            );
+
+                            instagramDialogRegistraion.show();
+                            return true;
+
+                        case CONTEXT_MENU_FILE_DELETE:
+                            DeleteFileDialogBox deleteFileDialogBox =
+                                    new DeleteFileDialogBox(GalleryScreen.this,
+                                            files[currentFileIndex]);
+
+                            deleteFileDialogBox.show();
+                            deleteFileDialogBox.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    // it means that user don't want to delete file
+                                    Log.d("Delete File","user answer is no");
+                                }
+                            });
+                            deleteFileDialogBox.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    // file was deleted by user. remove it
+                                    Log.d("Delete File", "user answer is yes");
+
+                                    loadFiles(".jpg");
+                                    matchTableWithImageView(3);
+                                }
+                            });
+                            return true;
+                    }
+                    return false;
+                }
+            });
     }
 
     @Override
@@ -267,6 +402,48 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_offline));
                 tvOnlineStatus.setText(getResources().getString(R.string.internet_status_offline));
             }
+        }
+    }
+
+    class SharePhotoTask extends AsyncTask<Void, Void, Boolean>{
+        ProgressDialog progressDialog = null;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = ProgressDialog.show(GalleryScreen.this, "",
+                    "Uploading to vk.com. Please wait...", true);
+            //progressBar.setVisibility(View.VISIBLE);
+            Log.d("VK", "share task start");
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            Log.d("VK", "Background upload");
+            if (SharedStaticAppData.isOnline()){
+                if (SharedStaticAppData.isUploadToVKAlbum())
+                    VKManager.UploadPhotoToAlbum(files[currentFileIndex]);
+                //VKManager.WallPostPhoto(sharedPhotos[currentSharedPhotosInd]);
+
+                return true;
+            }
+
+            return  false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d("VK", "share task finished");
+            progressDialog.cancel();
+
+            String text = aVoid ? "upload finished" : "check your internet connection";
+            Toast.makeText(GalleryScreen.this, text, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            Log.d("VK", "share task canceled");
         }
     }
 }

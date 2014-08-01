@@ -191,13 +191,15 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
         shareTask = new SharePhotoTask();
 
-        VKAccessToken at = SharedStaticAppData.restore_AccessToken();
+        VKManager.InitVk();
+
+        /*VKAccessToken at = SharedStaticAppData.restore_AccessToken();
         if (SharedStaticAppData.isVkInialized == false){
             Log.d("VK", "vk init");
             // first creation. Vk sdk must be initialized.
             VKSdk.initialize(vksdkListener, VKManager.strVKAppID, at);
             SharedStaticAppData.isVkInialized = true;
-        }
+        }*/
     }
 
     @Override
@@ -242,7 +244,9 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
                 break;
 
             case R.id.id_btn_delete_photo:
-                DeleteFileDialogBox deleteFileDialogBox = new DeleteFileDialogBox(context, sharedPhotos[currentSharedPhotosInd]);
+                DeleteFileDialogBox deleteFileDialogBox =
+                        new DeleteFileDialogBox(context, sharedPhotos[currentSharedPhotosInd]);
+
                 deleteFileDialogBox.show();
                 deleteFileDialogBox.setOnCancelListener(new OnCancelListener() {
                     @Override
@@ -262,13 +266,11 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
                 break;
         }
     }
-
+/*
     private VKSdkListener vksdkListener = new VKSdkListener() {
         @Override
         public void onCaptchaError(VKError captchaError) {
-            /*
-            * Пришла капча
-            * */
+            // Пришла капча
 
             Log.d("VK", "captch error");
             new VKCaptchaDialog(captchaError).show();
@@ -276,18 +278,16 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
         @Override
         public void onTokenExpired(VKAccessToken expiredToken) {
-            /*
-            * истек срок действия токена
-            * */
+            // истек срок действия токена
+
             VKSdk.authorize(VKManager.scopes);
             Log.d("VK", "token expired");
         }
 
         @Override
         public void onAccessDenied(VKError authorizationError) {
-            /*
-            * запрет доступа
-            * */
+            // запрет доступа
+
             Log.d("VK", "access denied");
             new AlertDialog.Builder(VkShareDialogBox.this.context)
                     .setMessage(authorizationError.errorMessage)
@@ -297,9 +297,8 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
 
         @Override
         public void onReceiveNewToken(VKAccessToken newToken) {
-            /*
-            * получен новый токен
-            * */
+
+            // получен новый токен
 
             Log.d("VK", "new token was received");
             SharedStaticAppData.save_VKAccessToken(newToken);
@@ -322,7 +321,7 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         }
     };
 
-
+*/
     class SharePhotoTask extends AsyncTask<Void, Void, Boolean>{
         @Override
         protected void onPreExecute() {

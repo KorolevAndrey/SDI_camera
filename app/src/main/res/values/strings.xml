@@ -26,6 +26,10 @@
 
     <string name="vk_default_album_name">SDI_camera</string>
 
+    <string name="str_context_menu_field_vk_share">VK share</string>
+    <string name="str_context_menu_field_instagram_share">Instagram</string>
+    <string name="str_context_menu_field_delete_file">Delete</string>
+
     <color name="color_status_offline">#dd3131</color>
     <color name="color_status_online">#31dd31</color>
     <color name="main_screen_background">#333333</color>

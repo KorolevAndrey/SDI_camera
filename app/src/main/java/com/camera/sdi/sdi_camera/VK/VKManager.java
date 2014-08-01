@@ -1,5 +1,6 @@
 package com.camera.sdi.sdi_camera.VK;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -12,8 +13,10 @@ import android.util.Pair;
 
 import com.camera.sdi.sdi_camera.SharedStaticAppData;
 import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
+import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
@@ -281,5 +284,75 @@ public class VKManager {
             }
         });
     }
+
+    /*
+    * check if vk.com was initialized.
+    * */
+    public static void InitVk(){
+        if (SharedStaticAppData.isVkInialized == false){
+            VKAccessToken at = SharedStaticAppData.restore_AccessToken();
+            Log.d("VK", "vk init");
+            // first creation. Vk sdk must be initialized.
+            VKSdk.initialize(vksdkListener, VKManager.strVKAppID, at);
+            SharedStaticAppData.isVkInialized = true;
+        }
+    }
+
+    public static VKSdkListener vksdkListener = new VKSdkListener() {
+        @Override
+        public void onCaptchaError(VKError captchaError) {
+            /*
+            * Пришла капча
+            * */
+
+            Log.d("VK", "captch error");
+            new VKCaptchaDialog(captchaError).show();
+        }
+
+        @Override
+        public void onTokenExpired(VKAccessToken expiredToken) {
+            /*
+            * истек срок действия токена
+            * */
+            VKSdk.authorize(VKManager.scopes);
+            Log.d("VK", "token expired");
+        }
+
+        @Override
+        public void onAccessDenied(VKError authorizationError) {
+            /*
+            * запрет доступа
+            * */
+            Log.d("VK", "access denied");
+
+        }
+
+        @Override
+        public void onReceiveNewToken(VKAccessToken newToken) {
+            /*
+            * получен новый токен
+            * */
+
+            Log.d("VK", "new token was received");
+            SharedStaticAppData.save_VKAccessToken(newToken);
+            SharedStaticAppData.save_VKUserId(Long.parseLong(newToken.userId));
+
+            //Intent i = new Intent(VKLoginActivity.this, VkShareDialogBox.class);
+            //startActivity(i);
+        }
+
+        @Override
+        public void onAcceptUserToken(VKAccessToken token) {
+            Log.d("VK", "accept");
+            VKManager.user_id = Long.parseLong(token.userId);
+            SharedStaticAppData.save_VKUserId(VKManager.user_id);
+            SharedStaticAppData.save_VKAccessToken(token);
+
+//            Intent i = new Intent(VKLoginActivity.this, GalleryScreen.class);
+            //          startActivity(i);
+            //finish();
+        }
+    };
+
 
 }
