@@ -54,7 +54,7 @@ public class CameraManager {
     public String SavePhoto(byte[] data){
         //  get current datetime
         date = new Date();
-        String now = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss_S").format(date);
+        String now = new SimpleDateFormat("HH_mm_ss_S").format(date);
         //String now = "tmp";
         Log.d("debug", "time:" + now.toString());
 

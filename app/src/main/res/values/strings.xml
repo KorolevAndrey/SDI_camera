@@ -22,6 +22,11 @@
     <string name="str_instagram_password">Password</string>
     <string name="str_instagram_repeat_password">Repeat password</string>
 
+
+    <string name="view_tag_key_files_index">1</string>;
+    <string name="view_tag_key_type">2</string>;
+    <string name="view_tag_key_file">3</string>;
+
     <string name="upload_target_wall">wall</string>
 
     <string name="vk_default_album_name">SDI_camera</string>

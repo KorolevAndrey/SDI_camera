@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.camera.sdi.sdi_camera.FileManager.FileManager;
 import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
 import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.vk.sdk.VKAccessToken;
@@ -190,7 +191,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
                     public void onPictureTaken(byte[] data, Camera camera) {
                         // save picture
                         //Logger.Log("[no autofocus] try to save photo");
-                        File pictures_dir = SharedStaticAppData.getBaseDir();
+                        File pictures_dir = FileManager.getBaseDir();
                         Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
                         CameraManager cm = new CameraManager(pictures_dir);
                         Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
@@ -278,8 +279,11 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         // shared data container
         appData = new SharedStaticAppData(this);
+
+        // set base file directory
         File base = getExternalFilesDir(null);
-        appData.setBaseDir(base);
+        FileManager.setBaseDir(base);
+        FileManager.setCurrentDir(base);
 
         // get power manager to keep screen on
         powerManager  = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -287,7 +291,11 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         // restore saved shared preferences
         VKManager.user_id = SharedStaticAppData.restore_VKUserId();
-        Log.d("VK", "onload token: " + VKAccessToken.tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey()).accessToken);
+        Log.d("VK", "onload token: " +
+                VKAccessToken
+                        .tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey())
+                        .accessToken
+        );
     }
 
     @Override

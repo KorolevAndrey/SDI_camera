@@ -20,6 +20,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="camera"/>
+
+        <Button
+            android:gravity="center"
+            android:padding="5dp"
+            android:id="@+id/id_btn_move_photos_to_archive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="move to archive"/>
+
         <TextView
             android:gravity="center"
             android:layout_width="wrap_content"
@@ -30,6 +39,16 @@
             android:textColor="@color/color_status_online"
             android:paddingLeft="10dp"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/id_tv_current_directory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="base folder"
+        android:textColor="@color/color_gradient_button_pressed_start"
+        android:layout_gravity="center_horizontal"
+        />
 
     <ScrollView
         android:paddingTop="10dp"

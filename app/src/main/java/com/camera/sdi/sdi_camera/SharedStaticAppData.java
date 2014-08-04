@@ -12,6 +12,7 @@ import android.util.Log;
 import com.vk.sdk.VKAccessToken;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by sdi on 20.07.14.
@@ -35,13 +36,15 @@ public class SharedStaticAppData {
     //--------------------
 
     private static Context context = null;
-    private static File baseDir = null;
     private static boolean VK_UPLOAD_TO_ALBUM = true; // true -- upload to album; false -- on wall
 
     // this variable show if alive asyncTask, that check your internet connection
     // asyncTask will be stoped when this variable will set to "false"
     // using in asynctask: while (isAlive){...}
     public static boolean isAlive_AsyncTaskOnlineStatusRefresher = false;
+
+    // move files that created more than 1(max days in base folder) day ago to archive
+    public static int MAX_DAYS_IN_BASE_FOLDER = 1;
     public static boolean UPLOAD_TARGET_ALBUM = true;
     public static boolean UPLOAD_TARGET_WALL  = false;
 
@@ -175,9 +178,5 @@ public class SharedStaticAppData {
         return (info != null && info.isConnected());
     }
 
-    public static void setBaseDir(File nBaseDir){
-        baseDir = nBaseDir;
-    }
 
-    public static File getBaseDir(){return baseDir;}
 }
