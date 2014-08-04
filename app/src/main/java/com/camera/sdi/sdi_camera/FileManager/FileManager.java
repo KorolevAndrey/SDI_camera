@@ -15,6 +15,15 @@ import java.util.Date;
 
 /**
  * Created by sdi on 04.08.14.
+ *................................................................................
+ *  >>>>>> THIS CLASS CONTAINS ONLY STATIC METHODS. IT HAVE NO CONSTRUCTOR  <<<<<<
+ *................................................................................
+ * This class provides base operations with photo files.
+ * public methods:
+ *  ...getArchive returns directories in base folder.
+ *  ...moveFiles replaces files from base folder to archive
+ *  ...moveOldFilesToArchive does the same as moveFiles but only for files that exist more
+ *       than fixed period of time (default: 1 day)
  */
 public class FileManager {
 
@@ -23,7 +32,7 @@ public class FileManager {
     private static File baseDir = null;
 
     private static File currentDir = null;
-    
+
     /*
     * Archive is placed in base directory.
     * Every subdirectory in base directory is named as date when it was created.
@@ -85,6 +94,12 @@ public class FileManager {
         return true; // files was moved
     }
 
+    /*
+    * Find all files that was created more than MAX_DAYS_IN_BASE_FOLDER and
+    * replace it to archive.
+    *
+    * @return result of replacing. see moveToArchive function.
+    * */
     public static boolean moveOldFilesToArchive(){
         final Date today = new Date();
         File[] oldFiles = baseDir.listFiles(new FilenameFilter() {
