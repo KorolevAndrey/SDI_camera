@@ -81,6 +81,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
             try {
                 camera = Camera.open(SharedStaticAppData.CAMERA_ID);
                 camera.startPreview();
+
             } catch (Exception e) {
                 Log.d("debug", e.getMessage());
             }
@@ -102,8 +103,25 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 Log.d("debug", "surfaceCreated");
                 if (camera == null)
                     camera = Camera.open(SharedStaticAppData.CAMERA_ID);
+
+                // get max possible resolution
+                List<Camera.Size> possibleSize = camera.getParameters().getSupportedPictureSizes();
+                Camera.Size maxSize = possibleSize.get(0);
+                for (Camera.Size s : possibleSize){
+                    if (s.height * s.width > maxSize.height * maxSize.width)
+                        maxSize = s;
+                }
+
+                // set max possible resolution
+                Camera.Parameters params = camera.getParameters();
+                params.setPictureSize(maxSize.width, maxSize.height);
+                camera.setParameters(params);
+
+                Log.d("camera", "size : w = " + maxSize.width + " h = " + maxSize.height);
+
                 camera.setPreviewDisplay(holder);
                 camera.startPreview();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

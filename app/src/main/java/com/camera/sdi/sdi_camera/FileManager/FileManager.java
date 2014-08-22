@@ -70,7 +70,7 @@ public class FileManager {
         // create file in base directory named as <<year_month_day>>
         File archiveDir = new File(baseDir, currentDate);
 
-        if (archiveDir.exists() == false){
+        if (archiveDir.exists() == false && files != null && files.length > 0){
             // archive folder not exists
             Log.d(DEBUG_TAG, "try to create directory: " + archiveDir.getAbsolutePath());
             try {
@@ -110,7 +110,8 @@ public class FileManager {
                 long dayDiff = (today.getTime() - lastModified) / (1000 * 60 * 60 * 24);
                 Log.d(DEBUG_TAG, filename + " modified " + dayDiff + " days ago");
 
-                return dayDiff >= SharedStaticAppData.MAX_DAYS_IN_BASE_FOLDER;
+                return dayDiff >= SharedStaticAppData.MAX_DAYS_IN_BASE_FOLDER &&
+                        currentFile.isFile();
             }
         });
 

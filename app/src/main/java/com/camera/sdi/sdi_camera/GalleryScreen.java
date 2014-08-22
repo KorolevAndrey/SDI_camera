@@ -129,6 +129,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 if (currentDir == FileManager.getBaseDir()){
                     // in base directory. move files to archive
                     FileManager.moveToArchive();
+                    _refreshCurrentDirectory();
                 } else{
                     // back to base dir
                     FileManager.setCurrentDir(FileManager.getBaseDir());
@@ -150,6 +151,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
     private void _refreshCurrentDirectory() {
         File currentDir = FileManager.getCurrentDir();
+        Log.d("Files", "current dir: " + currentDir.getName());
+
         if (currentDir == FileManager.getBaseDir()){
             tvCurrentDirectory.setText("base directory");
             btnMoveToArchive.setText("move to archive");
@@ -175,6 +178,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     }
 
     private void _refreshTableLayout(){
+        tableLayout.removeAllViews();
+
         loadFiles(".jpg");
         matchTableWithImageView(3);
         matchTableWithArchiveDirs(3);
@@ -183,6 +188,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     private void matchTableWithImageView(int column_count){
         //if (1 == 1) return;
         // clear layout
+        Log.d("debug", "tableLayout.removeAllViewsInLayout");
         tableLayout.removeAllViewsInLayout();
 
         // get image widthth
@@ -234,16 +240,20 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
             );
         }
 
-        TableRow tr = new TableRow(this);
-        tr.setLayoutParams(new ViewGroup.LayoutParams(
-                        TableRow.LayoutParams.MATCH_PARENT, img_width)
-        );
+        //TableRow tr = new TableRow(this);
+        //tr.setLayoutParams(new ViewGroup.LayoutParams(
+        //                TableRow.LayoutParams.MATCH_PARENT, img_width)
+        //);
 
     }
 
     private void matchTableWithArchiveDirs( int column_count){
-        if (FileManager.getCurrentDir() != FileManager.getBaseDir()){
+        Log.d("File manager", "current dir: " + FileManager.getCurrentDir().getAbsolutePath());
+        Log.d("File manager", "base dir: " + FileManager.getBaseDir().getAbsolutePath());
+        if ( !FileManager.getCurrentDir().getAbsolutePath()
+                .equals(FileManager.getBaseDir().getAbsolutePath())){
             // don't show archive if user not in base directory
+            Log.d("Files", "don't show archive");
             return;
         }
 
@@ -276,6 +286,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                 );
                 v.setTag(R.string.view_tag_key_file ,archive[i+j]); // save file
                 v.setTag(R.string.view_tag_key_type ,TYPE_FOLDER);  // save type
+                ((TextView)v.findViewById(R.id.id_tv_gallery_dir_name))
+                        .setText(archive[i+j].getName());
 
                 tr.addView(v, new TableRow.LayoutParams(img_width + 1, img_width));
 
