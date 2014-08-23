@@ -13,6 +13,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="ButtonCamera" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button_photo</item>
+    </style>
+
     <style name="VKAlbumSelectButtonStyle" parent="@android:style/Widget.Button">
         <item name="android:background">@drawable/button_vk_album</item>
         <item name="android:textColor">@color/color_btn_text</item>

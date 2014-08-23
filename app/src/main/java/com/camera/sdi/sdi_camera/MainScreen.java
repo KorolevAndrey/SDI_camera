@@ -72,6 +72,10 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 startActivity(i);
 
                 break;
+
+            case R.id.id_btn_make_photo:
+                autoFocusMakeShot();
+                break;
         }
     }
 
@@ -291,6 +295,7 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
         ((SurfaceView) findViewById(R.id.id_sv_camera)).setOnClickListener(this);
         ((Button) findViewById(R.id.id_btn_gallery)).setOnClickListener(this);
+        ((Button) findViewById(R.id.id_btn_make_photo)).setOnClickListener(this);
 
         // clear log on create
         Logger = new DebugLogger();
