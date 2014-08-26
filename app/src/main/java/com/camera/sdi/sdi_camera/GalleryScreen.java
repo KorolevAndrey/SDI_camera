@@ -268,42 +268,60 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
         Log.d("debug", "column_count: " + column_count);
 
+        // init table row
+        TableRow tr = new TableRow(this);
+        tr.setLayoutParams(new ViewGroup.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT, img_width)
+        );
+
+        // get files to add (show) in container
         File[] archive = FileManager.getArchive();
         int n = archive.length;
-        for (int i=0; i<n && column_count>0 ; ++i){
-            TableRow tr = new TableRow(this);
-            tr.setLayoutParams(new ViewGroup.LayoutParams(
-                            TableRow.LayoutParams.MATCH_PARENT, img_width)
-            );
+        for (int i=0, current_collumn = 0; i<n && column_count>0 ; ++i, ++current_collumn){
 
             tr.setBackgroundColor(getResources().getColor(R.color.gallery_table_row_background));
             //if (1 == 1) return;
-            for (int j=0; j<column_count && i+j<n; ++j){
-                View v = getLayoutInflater().inflate(R.layout.view_directory, null, false);
-                v.setLayoutParams(new ViewGroup.LayoutParams(
-                                img_width,
-                                img_width)
+            View v = getLayoutInflater().inflate(R.layout.view_directory, null, false);
+            v.setLayoutParams(new ViewGroup.LayoutParams(
+                            img_width,
+                            img_width)
+            );
+            v.setTag(R.string.view_tag_key_file ,archive[i]); // save file
+            v.setTag(R.string.view_tag_key_type ,TYPE_FOLDER);  // save type
+            ((TextView)v.findViewById(R.id.id_tv_gallery_dir_name))
+                    .setText(archive[i].getName());
+
+            tr.addView(v, new TableRow.LayoutParams(img_width + 1, img_width));
+
+            registerForContextMenu(v);
+            v.setOnCreateContextMenuListener(this);
+            v.setOnClickListener(this);
+
+            if ((current_collumn %= column_count) == column_count-1) {
+                // first, second, third ... column_count-1    elements in row
+                // row must be added to container
+                tableLayout.addView(tr,
+                        new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                                TableLayout.LayoutParams.WRAP_CONTENT)
                 );
-                v.setTag(R.string.view_tag_key_file ,archive[i+j]); // save file
-                v.setTag(R.string.view_tag_key_type ,TYPE_FOLDER);  // save type
-                ((TextView)v.findViewById(R.id.id_tv_gallery_dir_name))
-                        .setText(archive[i+j].getName());
 
-                tr.addView(v, new TableRow.LayoutParams(img_width + 1, img_width));
-
-                registerForContextMenu(v);
-                v.setOnCreateContextMenuListener(this);
-                v.setOnClickListener(this);
+                // create new row
+                tr = new TableRow(this);
+                tr.setLayoutParams(new ViewGroup.LayoutParams(
+                                TableRow.LayoutParams.MATCH_PARENT, img_width)
+                );
             }
+        }
 
-            tableLayout.addView( tr,
+        if (tr.getChildCount() > 0){
+            // not completed row must be added to container
+            tableLayout.addView(tr,
                     new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                             TableLayout.LayoutParams.WRAP_CONTENT)
             );
         }
 
-
-    }
+    } // end of function matchTableWithArchiveDirs(...)
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
