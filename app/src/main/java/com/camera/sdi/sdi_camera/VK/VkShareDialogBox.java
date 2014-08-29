@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,13 +43,13 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
     float fImageTouch_dx =0;
     float fImageTouch_dy =0;
 
-    Context context              = null;
-    TextView tvImageIndex        = null;
-    Button btnShareVK            = null;
-    Button btnCancel             = null;
-    Button btnDelete             = null;
-    Button btnShareInstagram     = null;
-    ScrollPowerView spvPower     = null;
+    Context context               = null;
+    TextView tvImageIndex         = null;
+    ImageButton btnShareVK        = null;
+    ImageButton btnCancel         = null;
+    ImageButton btnDelete         = null;
+    ImageButton btnShareInstagram = null;
+    ScrollPowerView spvPower      = null;
 
     File[] sharedPhotos   = null;
     int currentSharedPhotosInd = 0;
@@ -104,13 +105,13 @@ public class VkShareDialogBox extends Dialog implements View.OnClickListener{
         setContentView(R.layout.dialog_vk_share);
 
         // assign UI
-        btnDelete    = (Button) findViewById(R.id.id_btn_delete_photo);
-        btnShareVK     = (Button) findViewById(R.id.id_btn_share_photo_vk);
-        btnCancel    = (Button) findViewById(R.id.id_btn_share_cancel);
+        btnDelete    = (ImageButton) findViewById(R.id.id_btn_delete_photo);
+        btnShareVK     = (ImageButton) findViewById(R.id.id_btn_share_photo_vk);
+        btnCancel    = (ImageButton) findViewById(R.id.id_btn_share_cancel);
         progressBar  = (ProgressBar) findViewById(R.id.id_pb_vk_upload);
         tvImageIndex = (TextView) findViewById(R.id.id_tv_image_index);
         spvPower     = (ScrollPowerView) findViewById(R.id.id_spv_scroll_power);
-        btnShareInstagram = (Button) findViewById(R.id.id_btn_share_instagram);
+        btnShareInstagram = (ImageButton) findViewById(R.id.id_btn_share_instagram);
 
         // set click_listeners
         btnCancel.setOnClickListener(this);

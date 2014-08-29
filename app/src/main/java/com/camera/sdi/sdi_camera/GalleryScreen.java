@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -55,7 +56,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     File[] files = null;
     DebugLogger Logger = null;
 
-    Button btnMoveToArchive = null;
+    ImageButton btnMoveToArchive = null;
 
     TextView tvOnlineStatus = null;
     TextView tvCurrentDirectory = null;
@@ -121,7 +122,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
             }
         });
 
-        btnMoveToArchive = (Button) findViewById(R.id.id_btn_move_photos_to_archive);
+        btnMoveToArchive = (ImageButton) findViewById(R.id.id_btn_move_photos_to_archive);
         btnMoveToArchive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,11 +156,11 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
         if (currentDir == FileManager.getBaseDir()){
             tvCurrentDirectory.setText("base directory");
-            btnMoveToArchive.setText("move to archive");
+            btnMoveToArchive.setBackgroundResource(R.drawable.icon_move_to_archive);
         } else{
             String name = currentDir.getName();
             tvCurrentDirectory.setText(name);
-            btnMoveToArchive.setText("back to base folder");
+            btnMoveToArchive.setBackgroundResource(R.drawable.icon_return);
         }
 
         _refreshTableLayout();

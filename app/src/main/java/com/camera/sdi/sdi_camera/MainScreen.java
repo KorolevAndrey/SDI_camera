@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.FileManager.FileManager;
@@ -75,6 +76,12 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
             case R.id.id_btn_make_photo:
                 autoFocusMakeShot();
+                break;
+
+            case R.id.id_btn_options:
+                // start options activity
+                Intent intent_options = new Intent(this, ActivityOptions.class);
+                startActivity(intent_options);
                 break;
         }
     }
@@ -294,8 +301,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
         if (camera == null) camera = Camera.open(SharedStaticAppData.CAMERA_ID);
 
         ((SurfaceView) findViewById(R.id.id_sv_camera)).setOnClickListener(this);
-        ((Button) findViewById(R.id.id_btn_gallery)).setOnClickListener(this);
+        ((ImageButton) findViewById(R.id.id_btn_gallery)).setOnClickListener(this);
         ((Button) findViewById(R.id.id_btn_make_photo)).setOnClickListener(this);
+        ((ImageButton) findViewById(R.id.id_btn_options)).setOnClickListener(this);
 
         // clear log on create
         Logger = new DebugLogger();

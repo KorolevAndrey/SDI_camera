@@ -1,63 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:paddingTop="10dp"
-        android:paddingLeft="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:gravity="center"
-            android:padding="5dp"
-            android:id="@+id/id_btn_refresh_gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="camera"/>
-
-        <Button
-            android:gravity="center"
-            android:padding="5dp"
-            android:id="@+id/id_btn_move_photos_to_archive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="move to archive"/>
-
-        <TextView
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/id_tv_online_status"
-            android:textSize="20dp"
-            android:text="@string/internet_status_online"
-            android:textColor="@color/color_status_online"
-            android:paddingLeft="10dp"/>
-    </LinearLayout>
-
     <TextView
         android:id="@+id/id_tv_current_directory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
+        android:textSize="20dp"
         android:text="base folder"
         android:textColor="@color/color_gradient_button_pressed_start"
-        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
         />
+
+    <TextView
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/id_tv_online_status"
+        android:textSize="20dp"
+        android:text="@string/internet_status_online"
+        android:textColor="@color/color_status_online"/>
 
     <ScrollView
         android:paddingTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/id_tv_current_directory"
+        android:layout_above="@+id/id_ll_btn_container_gallery">
         <TableLayout
             android:id="@+id/id_tl_gallery_table"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </TableLayout>
     </ScrollView>
-</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/id_ll_btn_container_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:padding="5dp"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/id_btn_move_photos_to_archive"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/icon_move_to_archive"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"/>
+
+        <Button
+            style="@style/ButtonCamera"
+            android:gravity="right"
+            android:padding="5dp"
+            android:id="@+id/id_btn_refresh_gallery"
+            android:layout_width="45dp"
+            android:layout_height="45dp"/>
+    </LinearLayout>
+</RelativeLayout>
