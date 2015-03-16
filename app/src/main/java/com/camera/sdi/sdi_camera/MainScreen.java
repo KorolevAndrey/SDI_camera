@@ -6,9 +6,10 @@ import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -22,11 +23,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.FileManager.FileManager;
 import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
 import com.camera.sdi.sdi_camera.VK.VKManager;
+import com.capricorn.RayMenu;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKUIHelper;
 
@@ -173,24 +176,11 @@ public class MainScreen extends Activity implements View.OnClickListener{
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (    keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-                keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             Log.d("debug", "pressed");
             try {
                 Logger.Log("try to make shot");
                 autoFocusMakeShot();
-                //makeShot();
-
-                /*Log.d("debug", "getExternalStorageDirectory: " + Environment.getExternalStorageDirectory().getAbsolutePath());
-                Log.d("debug", "getDataDirectory: " + Environment.getDataDirectory().getAbsolutePath());
-                if (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).exists()){
-                    Log.d("debug", "Exists");
-                }
-                try {
-                    Log.d("debug", "Docs: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
-                }catch (Exception e){}
-*/
                 Logger.Log( "shot maked");
                 //Toast.makeText(this, Environment.getDataDirectory().getAbsolutePath(), Toast.LENGTH_LONG).show();
             } catch (Exception e){
@@ -199,10 +189,54 @@ public class MainScreen extends Activity implements View.OnClickListener{
                 Logger.Log( "error : " + text);
             }
             return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ){
+            // todo: add possibility to change photo count in current series
+            new MakePhotoSeriesTask(5).execute();
+            return false;
         }
 
         return super.onKeyDown(keyCode, event);
     }
+
+    private class MakePhotoSeriesTask extends AsyncTask<Void, Void, Void>{
+        private int mPhotoCount = 1;
+
+        private void makePhotoSeries(){
+            mPhotosInCurrentSerie = 0;
+            for (int i=0; i<mPhotoCount; ++i){
+                // wait until last photo has saved
+                while (mPhotosInCurrentSerie < i){
+                    try {Thread.sleep(100, 0);} catch (InterruptedException e) {}
+                };
+
+                // make next photo
+                publishProgress();
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            try{
+                autoFocusMakeShot();
+            } catch(Exception e){
+                Toast.makeText(getBaseContext(), "Error !!!", Toast.LENGTH_LONG).show();
+            }
+            Log.d("debug camera", "photo made");
+        }
+
+        public MakePhotoSeriesTask(int photoCount){
+            mPhotoCount = photoCount;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            makePhotoSeries();
+            return null;
+        }
+    }
+
+
+    private volatile static int mPhotosInCurrentSerie = 0;
 
     private void autoFocusMakeShot(){
         if (camera == null) {
@@ -214,71 +248,31 @@ public class MainScreen extends Activity implements View.OnClickListener{
             @Override
             public void onAutoFocus(boolean success, Camera camera) {
                 Log.d("Camera", success ? " autofocus success" : "autofocus fail");
-                if (success)
-                camera.takePicture(null, null, new Camera.PictureCallback() {
-                    @Override
-                    public void onPictureTaken(byte[] data, Camera camera) {
-                        // save picture
-                        //Logger.Log("[no autofocus] try to save photo");
-                        File pictures_dir = FileManager.getBaseDir();
-                        Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
-                        CameraManager cm = new CameraManager(pictures_dir);
-                        Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
-                        forceCamera();
-                    }
-                });
-            }
-        });
-    }
-
-    /*private void makeShot(){
-        if (camera == null)
-            Logger.Log("camera is null");
-        else
-            Logger.Log("camera is not null");
-
-        Camera.Parameters cam_params = camera.getParameters();
-        List<String> focusModes = cam_params.getSupportedFocusModes();
-        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
-            // called when user try to make shot
-            // and device has autofocus
-            camera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean success, Camera camera) {
-                    // this function called wher camera finished auto focusing
-                    Logger.Log("[autofocus] try to save photo");
-                    Log.d("debug", "autofocus");
+                if (success) {
                     camera.takePicture(null, null, new Camera.PictureCallback() {
                         @Override
                         public void onPictureTaken(byte[] data, Camera camera) {
                             // save picture
-                            File pictures_dir = SharedStaticAppData.getBaseDir();
+                            //Logger.Log("[no autofocus] try to save photo");
+                            File pictures_dir = FileManager.getBaseDir();
                             Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
                             CameraManager cm = new CameraManager(pictures_dir);
-                            Toast.makeText(getBaseContext(), cameraManager.SavePhoto(data) + " autofocus enabled", Toast.LENGTH_LONG).show();
+                            String savedPhotoName = cm.SavePhoto(data);
+                            //Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
+                            forceCamera();
+
+                            // the photo was made
+                            mPhotosInCurrentSerie += 1;
+                            Log.d("debug camera", savedPhotoName);
                         }
                     });
-                    forceCamera();
-                }// end of autofocus
-            });
-        } else{
-            Log.d("debug", "no autofocus");
-            // called whed device has no autofocus
-            camera.takePicture(null, null, new Camera.PictureCallback() {
-                @Override
-                public void onPictureTaken(byte[] data, Camera camera) {
-                    // save picture
-                    Logger.Log("[no autofocus] try to save photo");
-                    File pictures_dir = SharedStaticAppData.getBaseDir();
-                    Log.d("debug", "pic dir : " + pictures_dir.getAbsolutePath());
-                    CameraManager cm = new CameraManager(pictures_dir);
-                    Toast.makeText(getBaseContext(), cm.SavePhoto(data)+" autofocus disabled", Toast.LENGTH_LONG).show();
-                    forceCamera();
+                } else {
+                    Log.d("debug camera", "fail");
                 }
-            });
-        }
+            }
+        });
     }
-*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -305,6 +299,9 @@ public class MainScreen extends Activity implements View.OnClickListener{
         ((Button) findViewById(R.id.id_btn_make_photo)).setOnClickListener(this);
         ((ImageButton) findViewById(R.id.id_btn_options)).setOnClickListener(this);
 
+        // init menu
+        initRaymenu();
+
         // clear log on create
         Logger = new DebugLogger();
 
@@ -327,6 +324,58 @@ public class MainScreen extends Activity implements View.OnClickListener{
                         .tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey())
                         .accessToken
         );
+    }
+
+    /*
+    * get raymenu and set buttons to it
+    * */
+    private void initRaymenu(){
+        RayMenu rayMenu = (RayMenu) findViewById(R.id.id_raymenu);
+
+        // save context to use it in OnClickListener methods
+        final Context context = this;
+
+        // create imageView button
+        ImageView settingImageView = new ImageView(this);
+        settingImageView.setImageResource(R.drawable.icon_options);
+        rayMenu.addItem(settingImageView, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // start options activity
+                Intent intent_options = new Intent(context, ActivityOptions.class);
+                startActivity(intent_options);
+            }
+        });
+
+        // create imageView button
+        ImageView galleryImageView = new ImageView(this);
+        galleryImageView.setImageResource(R.drawable.icon_gallery);
+        rayMenu.addItem(galleryImageView, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<String> lFileNames = cameraManager.getFileNamesInBaseDir();
+                for (String s : lFileNames)
+                Log.d("debug", s);
+                Log.d("debug", "-------------");
+
+                camera.stopPreview();
+                camera.release();
+                camera = null;
+
+                Intent i = new Intent(context, GalleryScreen.class);
+                startActivity(i);
+            }
+        });
+
+        // create imageView button
+        ImageView makePhotoImageView = new ImageView(this);
+        makePhotoImageView.setImageResource(R.drawable.button_photo);
+        rayMenu.addItem(makePhotoImageView, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                autoFocusMakeShot();
+            }
+        });
     }
 
     @Override

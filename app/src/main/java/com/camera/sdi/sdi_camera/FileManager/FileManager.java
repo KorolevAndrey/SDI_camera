@@ -4,13 +4,9 @@ import android.util.Log;
 
 import com.camera.sdi.sdi_camera.SharedStaticAppData;
 
-import org.apache.http.impl.cookie.DateUtils;
-
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -88,7 +84,9 @@ public class FileManager {
             Log.d(DEBUG_TAG, "old: " + f.getAbsolutePath() +
                     "\n\tnew :" + nFile.getAbsolutePath());
 
-            f.renameTo(nFile);
+            if (f.isFile()){
+                f.renameTo(nFile);
+            }
         }
 
         return true; // files was moved
