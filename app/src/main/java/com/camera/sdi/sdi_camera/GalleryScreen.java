@@ -26,6 +26,8 @@ import com.camera.sdi.sdi_camera.ListAdapters.ImageGalleryAdapter;
 import com.camera.sdi.sdi_camera.Models.ImageGalleryItem;
 import com.camera.sdi.sdi_camera.Models.ImageGalleryItemDirectory;
 import com.camera.sdi.sdi_camera.Models.ImageGalleryItemImage;
+import com.camera.sdi.sdi_camera.OnlineChecker.InternetConnectionCheckHandler;
+import com.camera.sdi.sdi_camera.OnlineChecker.InternetConnectionCheckerThread;
 import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
 import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.camera.sdi.sdi_camera.VK.VKWallPostDialogBox;
@@ -41,17 +43,13 @@ import java.io.FilenameFilter;
  * Created by sdi on 18.07.14.
  */
 public class GalleryScreen extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
-
-    final static int TYPE_IMAGE = 1;
-    final static int TYPE_FOLDER = 2;
-
     final static int CONTEXT_MENU_VK_SHARE = 1;
     final static int CONTEXT_MENU_INSTAGRAM_SHARE = 2;
     final static int CONTEXT_MENU_FILE_DELETE = 3;
 
     StaggeredGridView mStaggeredGridView = null;
     ImageGalleryAdapter mImageGalleryAdapter = null;
-    //TableLayout tableLayout = null;
+
     File[] files = null;
     DebugLogger Logger = null;
 
@@ -64,7 +62,8 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
 
     SharePhotoTask shareTask = null;
 
-    RefreshInternetConnectionStatus internetStatusChecker = null;
+    InternetConnectionCheckHandler mInternetConnectionCheckHandler = null;
+    InternetConnectionCheckerThread mInternetConnectionCheckingThread = null;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,10 +120,30 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
 
         tvCurrentDirectory = (TextView) findViewById(R.id.id_tv_current_directory);
         _refreshCurrentDirectory();
+    }
 
-        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
-        internetStatusChecker = new RefreshInternetConnectionStatus();
-        internetStatusChecker.execute();
+    private void startInternetConnectionChecking(){
+        mInternetConnectionCheckHandler = new InternetConnectionCheckHandler();
+        mInternetConnectionCheckHandler.setOnInternetConnectionStateChangeListener(
+                new InternetConnectionCheckHandler.OnInternetConnectionStateChangeListener() {
+                    @Override
+                    public void online() {
+                        tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_online));
+                        tvOnlineStatus.setText(getResources().getString(R.string.internet_status_online));
+                    }
+
+                    @Override
+                    public void offline() {
+                        tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_offline));
+                        tvOnlineStatus.setText(getResources().getString(R.string.internet_status_offline));
+                    }
+                }
+        );
+
+        mInternetConnectionCheckingThread = new InternetConnectionCheckerThread(
+                this, mInternetConnectionCheckHandler
+        );
+        mInternetConnectionCheckingThread.start();
     }
 
     private void _refreshCurrentDirectory() {
@@ -157,6 +176,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
 
     private void showImagesInCurrentDirectory(){
         loadFiles(".jpg");
+
         mImageGalleryAdapter.clear();
         for (File f : files){
             ImageGalleryItem itemToAdd = new ImageGalleryItemImage(this, f);
@@ -310,9 +330,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
     protected void onPause() {
         super.onPause();
 
-        Log.d("Internet status", "onPause");
-        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
-        internetStatusChecker.cancel(true);
+        mInternetConnectionCheckingThread.stopThread();
     }
 
     @Override
@@ -327,10 +345,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
         super.onResume();
         VKUIHelper.onResume(this);
 
-        Log.d("Internet status", "onResume");
-        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
-        internetStatusChecker = new RefreshInternetConnectionStatus();
-        internetStatusChecker.execute();
+        startInternetConnectionChecking();
     }
 
     @Override
@@ -347,20 +362,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
         if (!mImageGalleryAdapter.getItem(position).isDirectory()){
             // image was clicked
             VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, files, position);
-            vkShareDialogBox.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                    SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
-                    internetStatusChecker.cancel(true);
-                }
-            });
             vkShareDialogBox.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
-                    internetStatusChecker = new RefreshInternetConnectionStatus();
-                    internetStatusChecker.execute();
-
                     if (((VkShareDialogBox) dialog).isFileExists() == false) {
                         // file was deleted by user
                         _refreshCurrentDirectory();
@@ -372,53 +376,6 @@ public class GalleryScreen extends Activity implements View.OnClickListener, Ada
             // directory was clicked
             FileManager.setCurrentDir(mImageGalleryAdapter.getItem(position).getFile());
             _refreshCurrentDirectory();
-        }
-    }
-
-    class RefreshInternetConnectionStatus extends AsyncTask<Void, Void, Void>{
-        boolean isOnline = false;
-        long lastCall = System.currentTimeMillis();
-        long deltaTime = 1000; // equal to 1 second
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            boolean nStatus = SharedStaticAppData.isOnline();
-            publishProgress();
-            while (SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher){
-                if (System.currentTimeMillis() - lastCall < deltaTime) {
-                    try {
-                        Thread.sleep(deltaTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                //Log.d("Internet status", "called");
-                lastCall = System.currentTimeMillis();
-                nStatus = SharedStaticAppData.isOnline();
-                if (nStatus != isOnline){
-                    // online status changed
-                    // UI must be refreshed
-                    isOnline = nStatus;
-                    publishProgress();
-                    Log.d("Internet status", "is online: " + (isOnline ? "true" : "false"));
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            Log.d("Internet status", "onProgress");
-            if (isOnline) {
-                // set online message
-                tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_online));
-                tvOnlineStatus.setText(getResources().getString(R.string.internet_status_online));
-            }else{
-                // set offline message
-                tvOnlineStatus.setTextColor(getResources().getColor(R.color.color_status_offline));
-                tvOnlineStatus.setText(getResources().getString(R.string.internet_status_offline));
-            }
         }
     }
 
