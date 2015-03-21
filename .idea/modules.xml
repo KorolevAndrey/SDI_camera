@@ -4,8 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SDI_camera.iml" filepath="$PROJECT_DIR$/SDI_camera.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/arcmenu/arcmenu.iml" filepath="$PROJECT_DIR$/arcmenu/arcmenu.iml" />
-      <module fileurl="file://$PROJECT_DIR$/vksdk_library/vksdk_library.iml" filepath="$PROJECT_DIR$/vksdk_library/vksdk_library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/libs/app_libs_.iml" filepath="$PROJECT_DIR$/app/libs/app_libs_.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/libs/arcmenu/arcmenu.iml" filepath="$PROJECT_DIR$/app/libs/arcmenu/arcmenu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/libs/vksdk_library/vksdk_library.iml" filepath="$PROJECT_DIR$/app/libs/vksdk_library/vksdk_library.iml" />
     </modules>
   </component>
 </project>

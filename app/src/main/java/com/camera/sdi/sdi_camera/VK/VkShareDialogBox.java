@@ -1,7 +1,6 @@
 package com.camera.sdi.sdi_camera.VK;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -26,11 +24,6 @@ import com.camera.sdi.sdi_camera.Instagram.InstagramPhotoShare;
 import com.camera.sdi.sdi_camera.R;
 import com.camera.sdi.sdi_camera.ScrollPowerView;
 import com.camera.sdi.sdi_camera.SharedStaticAppData;
-import com.vk.sdk.VKAccessToken;
-import com.vk.sdk.VKCaptchaDialog;
-import com.vk.sdk.VKSdk;
-import com.vk.sdk.VKSdkListener;
-import com.vk.sdk.api.VKError;
 
 import java.io.File;
 

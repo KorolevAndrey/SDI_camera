@@ -3,16 +3,12 @@ package com.camera.sdi.sdi_camera;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.vk.sdk.VKAccessToken;
-
-import java.io.File;
-import java.util.HashMap;
 
 /**
  * Created by sdi on 20.07.14.

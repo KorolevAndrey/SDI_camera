@@ -1,13 +1,7 @@
 package com.camera.sdi.sdi_camera.VK;
 
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Parcel;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
 
@@ -23,15 +17,11 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.api.methods.VKApiPhotos;
 import com.vk.sdk.api.model.VKApiPhoto;
-import com.vk.sdk.api.model.VKApiPhotoAlbum;
 import com.vk.sdk.api.model.VKAttachments;
 import com.vk.sdk.api.model.VKPhotoArray;
-import com.vk.sdk.api.model.VKScopes;
 import com.vk.sdk.api.model.VKWallPostResult;
 import com.vk.sdk.api.photo.VKImageParameters;
-import com.vk.sdk.api.photo.VKUploadAlbumPhotoRequest;
 import com.vk.sdk.api.photo.VKUploadImage;
 
 import org.json.JSONArray;

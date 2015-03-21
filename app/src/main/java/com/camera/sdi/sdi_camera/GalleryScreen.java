@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +33,6 @@ import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.camera.sdi.sdi_camera.VK.VKWallPostDialogBox;
 import com.camera.sdi.sdi_camera.VK.VkShareDialogBox;
 import com.vk.sdk.VKAccessToken;
-import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
 
 import java.io.File;

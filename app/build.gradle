@@ -22,6 +22,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:19.+'
-    compile project(':vksdk_library')
-    compile project(':arcmenu')
+    compile project(':app/libs/:vksdk_library')
+    compile project(':app/libs/:arcmenu')
 }

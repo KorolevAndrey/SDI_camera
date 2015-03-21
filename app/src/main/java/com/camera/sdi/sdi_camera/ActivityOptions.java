@@ -4,17 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.VK.VKAlbumSelect;
-import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.vk.sdk.VKUIHelper;
-
-import java.util.List;
 
 /**
  * Created by sdi on 28.07.14.

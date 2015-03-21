@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/home/sdi/AndroidStudioProjects/SDI_camera/app/libs/arcmenu/src/main/assets"/></dataSet><dataSet config="debug"><source path="/home/sdi/AndroidStudioProjects/SDI_camera/app/libs/arcmenu/src/debug/assets"/></dataSet></merger>

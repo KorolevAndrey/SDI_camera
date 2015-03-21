@@ -13,20 +13,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.camera.sdi.sdi_camera.R;
 import com.camera.sdi.sdi_camera.SharedStaticAppData;
-import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
-import com.camera.sdi.sdi_camera.R;
 
 import java.util.List;
 

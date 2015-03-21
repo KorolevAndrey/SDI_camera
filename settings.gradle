@@ -1,2 +1,3 @@
-include ':vksdk_library',':app'
-include ':arcmenu'
+include ':app'
+include ':app/libs/:arcmenu'
+include ':app/libs/:vksdk_library'
