@@ -1,3 +1,4 @@
 include ':app'
 include ':app/libs/:arcmenu'
 include ':app/libs/:vksdk_library'
+include ':app/libs/:staggered_grid'

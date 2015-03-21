@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:19.+'
     compile project(':app/libs/:vksdk_library')
     compile project(':app/libs/:arcmenu')
+    compile project(':app/libs/:staggered_grid')
 }

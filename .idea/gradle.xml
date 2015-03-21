@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/libs" />
             <option value="$PROJECT_DIR$/app/libs/arcmenu" />
+            <option value="$PROJECT_DIR$/app/libs/staggered_grid" />
             <option value="$PROJECT_DIR$/app/libs/vksdk_library" />
           </set>
         </option>

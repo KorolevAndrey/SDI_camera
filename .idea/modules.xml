@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/libs/app_libs_.iml" filepath="$PROJECT_DIR$/app/libs/app_libs_.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/libs/arcmenu/arcmenu.iml" filepath="$PROJECT_DIR$/app/libs/arcmenu/arcmenu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/libs/staggered_grid/staggered_grid.iml" filepath="$PROJECT_DIR$/app/libs/staggered_grid/staggered_grid.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/libs/vksdk_library/vksdk_library.iml" filepath="$PROJECT_DIR$/app/libs/vksdk_library/vksdk_library.iml" />
     </modules>
   </component>

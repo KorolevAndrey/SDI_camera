@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants">
+
+    <com.etsy.android.grid.util.DynamicHeightImageView
+        android:id="@+id/id_dhiv_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.etsy.android.grid.util.DynamicHeightImageView>
+
+    <CheckBox
+        android:id="@+id/id_cb_select_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="top|left"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/id_tv_description"
+        android:layout_gravity="center"
+        android:text="some"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"/>
+</FrameLayout>

@@ -158,13 +158,13 @@ public class SharedStaticAppData {
         Matrix mtx = new Matrix();
         mtx.postRotate(90);
 
-        Bitmap rotated = Bitmap.createBitmap(bitmap,
+        return Bitmap.createBitmap(bitmap,
                 0                 ,0                  ,
                 bitmap.getWidth() , bitmap.getHeight(),
                 mtx, true);
 
         //bitmap.recycle();
-        return rotated;
+        //return rotated;
     }
 
     public static boolean isOnline(){

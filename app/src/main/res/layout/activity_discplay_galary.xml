@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -25,6 +25,20 @@
         android:text="@string/internet_status_online"
         android:textColor="@color/color_status_online"/>
 
+    <com.etsy.android.grid.StaggeredGridView
+        android:paddingTop="10dp"
+        android:id="@+id/id_sgv_image_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:item_margin="8dp"
+        app:column_count="2"
+        android:layout_below="@+id/id_tv_current_directory"
+        android:layout_above="@+id/id_ll_btn_container_gallery"
+        android:descendantFocusability="blocksDescendants">
+
+    </com.etsy.android.grid.StaggeredGridView>
+
+    <!--
     <ScrollView
         android:paddingTop="10dp"
         android:layout_width="match_parent"
@@ -37,7 +51,7 @@
             android:layout_height="match_parent">
         </TableLayout>
     </ScrollView>
-
+-->
     <LinearLayout
         android:id="@+id/id_ll_btn_container_gallery"
         android:layout_width="match_parent"

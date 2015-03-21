@@ -5,8 +5,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,23 +13,24 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.camera.sdi.sdi_camera.FileManager.FileManager;
 import com.camera.sdi.sdi_camera.Instagram.InstagramPhotoShare;
+import com.camera.sdi.sdi_camera.ListAdapters.ImageGalleryAdapter;
+import com.camera.sdi.sdi_camera.Models.ImageGalleryItem;
+import com.camera.sdi.sdi_camera.Models.ImageGalleryItemDirectory;
+import com.camera.sdi.sdi_camera.Models.ImageGalleryItemImage;
 import com.camera.sdi.sdi_camera.VK.VKLoginActivity;
 import com.camera.sdi.sdi_camera.VK.VKManager;
 import com.camera.sdi.sdi_camera.VK.VKWallPostDialogBox;
 import com.camera.sdi.sdi_camera.VK.VkShareDialogBox;
+import com.etsy.android.grid.StaggeredGridView;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKUIHelper;
 
@@ -41,7 +40,7 @@ import java.io.FilenameFilter;
 /**
  * Created by sdi on 18.07.14.
  */
-public class GalleryScreen extends Activity implements View.OnClickListener{
+public class GalleryScreen extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     final static int TYPE_IMAGE = 1;
     final static int TYPE_FOLDER = 2;
@@ -50,7 +49,9 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
     final static int CONTEXT_MENU_INSTAGRAM_SHARE = 2;
     final static int CONTEXT_MENU_FILE_DELETE = 3;
 
-    TableLayout tableLayout = null;
+    StaggeredGridView mStaggeredGridView = null;
+    ImageGalleryAdapter mImageGalleryAdapter = null;
+    //TableLayout tableLayout = null;
     File[] files = null;
     DebugLogger Logger = null;
 
@@ -98,50 +99,28 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         // use already created log to save data
         Logger = new DebugLogger(false);
 
+        // init gallery
+        mStaggeredGridView = (StaggeredGridView) findViewById(R.id.id_sgv_image_gallery);
+        mImageGalleryAdapter = new ImageGalleryAdapter(this, 0);
+        mStaggeredGridView.setAdapter(mImageGalleryAdapter);
+        mStaggeredGridView.setOnItemClickListener(this);
+
         tvOnlineStatus = (TextView) findViewById(R.id.id_tv_online_status);
-        tableLayout = ((TableLayout) findViewById(R.id.id_tl_gallery_table));
-        //if (VKAccessToken.tokenFromSharedPreferences(this,VKLoginActivity.sTokenKey).isExpired())
         Log.d("VK", "token: " + VKAccessToken
                         .tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey())
                         .accessToken
         );
 
-
-        Button btn = ((Button) findViewById(R.id.id_btn_refresh_gallery));
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Logger.Log("back to camera");
-                finish();
-                //Intent i = new Intent(GalleryScreen.this, MainScreen.class);
-                //startActivity(i);
-                /*loadFiles(".jpg");
-                matchTableWithImageView(3);*/
-            }
-        });
-
+        // init buttons
+        findViewById(R.id.id_btn_refresh_gallery).setOnClickListener(this);
         btnMoveToArchive = (ImageButton) findViewById(R.id.id_btn_move_photos_to_archive);
-        btnMoveToArchive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                File currentDir = FileManager.getCurrentDir();
-                if (currentDir == FileManager.getBaseDir()){
-                    // in base directory. move files to archive
-                    FileManager.moveToArchive();
-                    _refreshCurrentDirectory();
-                } else{
-                    // back to base dir
-                    FileManager.setCurrentDir(FileManager.getBaseDir());
-                    _refreshCurrentDirectory();
-                }
-            }
-        });
+        btnMoveToArchive.setOnClickListener(this);
+
+        // collect old photos to directory
+        FileManager.moveOldFilesToArchive();
 
         tvCurrentDirectory = (TextView) findViewById(R.id.id_tv_current_directory);
         _refreshCurrentDirectory();
-
-        FileManager.moveOldFilesToArchive();
-        _refreshTableLayout();
 
         SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
         internetStatusChecker = new RefreshInternetConnectionStatus();
@@ -152,16 +131,16 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         File currentDir = FileManager.getCurrentDir();
         Log.d("Files", "current dir: " + currentDir.getName());
 
-        if (currentDir == FileManager.getBaseDir()){
+        showImagesInCurrentDirectory();
+        if (currentDir.equals(FileManager.getBaseDir())){
             tvCurrentDirectory.setText("base directory");
             btnMoveToArchive.setBackgroundResource(R.drawable.icon_move_to_archive);
+            showArchiveDirectories();
         } else{
             String name = currentDir.getName();
             tvCurrentDirectory.setText(name);
             btnMoveToArchive.setBackgroundResource(R.drawable.icon_return);
         }
-
-        _refreshTableLayout();
     }
 
     private void loadFiles(final String format) {
@@ -170,157 +149,30 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         files = baseDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
-                return filename.length() > 3 && filename.endsWith(format);
+                return filename.length() > format.length() && filename.endsWith(format);
             }
         });
         Logger.Log(files.length + " files found");
     }
 
-    private void _refreshTableLayout(){
-        tableLayout.removeAllViews();
-
+    private void showImagesInCurrentDirectory(){
         loadFiles(".jpg");
-        matchTableWithImageView(3);
-        matchTableWithArchiveDirs(3);
+        mImageGalleryAdapter.clear();
+        for (File f : files){
+            ImageGalleryItem itemToAdd = new ImageGalleryItemImage(this, f);
+            mImageGalleryAdapter.add(itemToAdd);
+        }
+        mImageGalleryAdapter.notifyDataSetChanged();
     }
 
-    private void matchTableWithImageView(int column_count){
-        //if (1 == 1) return;
-        // clear layout
-        Log.d("debug", "tableLayout.removeAllViewsInLayout");
-        tableLayout.removeAllViewsInLayout();
-
-        // get image widthth
-        int img_width = getWindowManager().getDefaultDisplay().getWidth(); //tableLayout.getWidth();
-        Log.d("debug", "window width: " + img_width);
-        img_width /= column_count;
-        Log.d("debug", "img_width: "+ img_width);
-        if (img_width < 50) {
-            img_width = 50;
-            //column_count = tableLayout.getWidth() / img_width;
+    private void showArchiveDirectories(){
+        File[] archiveDirectories = FileManager.getArchive();
+        for (File dir : archiveDirectories){
+            ImageGalleryItem itemToAdd = new ImageGalleryItemDirectory(this, dir);
+            mImageGalleryAdapter.add(itemToAdd);
         }
-
-        Log.d("debug", "column_count: " + column_count);
-        int n = files.length;
-        for (int i=0; i<n && column_count > 0; i+=column_count){
-            TableRow tr = new TableRow(this);
-            tr.setLayoutParams(new ViewGroup.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT, img_width)
-            );
-
-            tr.setBackgroundColor(getResources().getColor(R.color.gallery_table_row_background));
-            //if (1 == 1) return;
-            BitmapFactory.Options bmp_options = new BitmapFactory.Options();
-            bmp_options.inSampleSize = 8;
-            for (int j=0; j<column_count && i+j<n; ++j){
-                String path = files[i+j].getAbsolutePath();
-
-                Bitmap bmp = SharedStaticAppData.rotateBitmap90Degrees(
-                        BitmapFactory.decodeFile(path,bmp_options)
-                );
-
-                ImageView iv = new ImageView(this);
-                iv.setLayoutParams(new ViewGroup.LayoutParams(img_width, img_width));
-                iv.setImageBitmap(bmp);
-                iv.setTag(R.string.view_tag_key_files_index, i + j); // save index
-                iv.setTag(R.string.view_tag_key_type, TYPE_IMAGE);   // save type
-                iv.setOnClickListener(this);
-
-                tr.addView(iv, new TableRow.LayoutParams(img_width+1, img_width));
-
-                registerForContextMenu(iv);
-                iv.setOnCreateContextMenuListener(this);
-                //bmp.recycle();
-            }
-
-            tableLayout.addView( tr,
-                    new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                            TableLayout.LayoutParams.WRAP_CONTENT)
-            );
-        }
-
-        //TableRow tr = new TableRow(this);
-        //tr.setLayoutParams(new ViewGroup.LayoutParams(
-        //                TableRow.LayoutParams.MATCH_PARENT, img_width)
-        //);
-
+        mImageGalleryAdapter.notifyDataSetChanged();
     }
-
-    private void matchTableWithArchiveDirs( int column_count){
-        Log.d("File manager", "current dir: " + FileManager.getCurrentDir().getAbsolutePath());
-        Log.d("File manager", "base dir: " + FileManager.getBaseDir().getAbsolutePath());
-        if ( !FileManager.getCurrentDir().getAbsolutePath()
-                .equals(FileManager.getBaseDir().getAbsolutePath())){
-            // don't show archive if user not in base directory
-            Log.d("Files", "don't show archive");
-            return;
-        }
-
-        int img_width = getWindowManager().getDefaultDisplay().getWidth(); //tableLayout.getWidth();
-        Log.d("debug", "window width: " + img_width);
-        img_width /= column_count;
-        Log.d("debug", "img_width: "+ img_width);
-        if (img_width < 50) {
-            img_width = 50;
-            //column_count = tableLayout.getWidth() / img_width;
-        }
-
-        Log.d("debug", "column_count: " + column_count);
-
-        // init table row
-        TableRow tr = new TableRow(this);
-        tr.setLayoutParams(new ViewGroup.LayoutParams(
-                        TableRow.LayoutParams.MATCH_PARENT, img_width)
-        );
-
-        // get files to add (show) in container
-        File[] archive = FileManager.getArchive();
-        int n = archive.length;
-        for (int i=0, current_collumn = 0; i<n && column_count>0 ; ++i, ++current_collumn){
-
-            tr.setBackgroundColor(getResources().getColor(R.color.gallery_table_row_background));
-            //if (1 == 1) return;
-            View v = getLayoutInflater().inflate(R.layout.view_directory, null, false);
-            v.setLayoutParams(new ViewGroup.LayoutParams(
-                            img_width,
-                            img_width)
-            );
-            v.setTag(R.string.view_tag_key_file ,archive[i]); // save file
-            v.setTag(R.string.view_tag_key_type ,TYPE_FOLDER);  // save type
-            ((TextView)v.findViewById(R.id.id_tv_gallery_dir_name))
-                    .setText(archive[i].getName());
-
-            tr.addView(v, new TableRow.LayoutParams(img_width + 1, img_width));
-
-            registerForContextMenu(v);
-            v.setOnCreateContextMenuListener(this);
-            v.setOnClickListener(this);
-
-            if ((current_collumn %= column_count) == column_count-1) {
-                // first, second, third ... column_count-1    elements in row
-                // row must be added to container
-                tableLayout.addView(tr,
-                        new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                                TableLayout.LayoutParams.WRAP_CONTENT)
-                );
-
-                // create new row
-                tr = new TableRow(this);
-                tr.setLayoutParams(new ViewGroup.LayoutParams(
-                                TableRow.LayoutParams.MATCH_PARENT, img_width)
-                );
-            }
-        }
-
-        if (tr.getChildCount() > 0){
-            // not completed row must be added to container
-            tableLayout.addView(tr,
-                    new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                            TableLayout.LayoutParams.WRAP_CONTENT)
-            );
-        }
-
-    } // end of function matchTableWithArchiveDirs(...)
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -420,7 +272,7 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
                                     // file was deleted by user. remove it
                                     Log.d("Delete File", "user answer is yes");
 
-                                    _refreshTableLayout();
+                                    _refreshCurrentDirectory();
                                 }
                             });
                             return true;
@@ -432,43 +284,24 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        int type = (Integer) v.getTag(R.string.view_tag_key_type); // image of folder
-        switch (type){
-            case TYPE_IMAGE:
-                // restore index
-                int ind = (Integer) v.getTag(R.string.view_tag_key_files_index);
+        int id = v.getId();
+        switch (id){
+            case R.id.id_btn_refresh_gallery:
+                Logger.Log("back to camera");
+                finish();
+                break;
 
-                VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, files, ind);
-                vkShareDialogBox.setOnShowListener(new DialogInterface.OnShowListener() {
-                    @Override
-                    public void onShow(DialogInterface dialog) {
-                        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
-                        internetStatusChecker.cancel(true);
-                    }
-                });
-                vkShareDialogBox.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
-                        internetStatusChecker = new RefreshInternetConnectionStatus();
-                        internetStatusChecker.execute();
-
-                        if (((VkShareDialogBox) dialog).isFileExists() == false) {
-                            // file was deleted by user
-                            _refreshTableLayout();
-                        }
-                    }
-                });
-                vkShareDialogBox.show();
-                //Toast.makeText(this, f.getName(), Toast.LENGTH_LONG).show();
-            break;
-
-            case TYPE_FOLDER:
-                // restore folder
-                File dir = (File) v.getTag(R.string.view_tag_key_file);
-                FileManager.setCurrentDir(dir);
-                _refreshCurrentDirectory();
-                //Toast.makeText(this, dir.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            case R.id.id_btn_move_photos_to_archive:
+                File currentDir = FileManager.getCurrentDir();
+                if (currentDir == FileManager.getBaseDir()){
+                    // in base directory. move files to archive
+                    FileManager.moveToArchive();
+                    _refreshCurrentDirectory();
+                } else{
+                    // back to base dir
+                    FileManager.setCurrentDir(FileManager.getBaseDir());
+                    _refreshCurrentDirectory();
+                }
                 break;
         }
     }
@@ -507,6 +340,39 @@ public class GalleryScreen extends Activity implements View.OnClickListener{
         Toast.makeText( this,
                 VKAccessToken.tokenFromSharedPreferences(this, VKLoginActivity.getTokenKey()).accessToken,
                 Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (!mImageGalleryAdapter.getItem(position).isDirectory()){
+            // image was clicked
+            VkShareDialogBox vkShareDialogBox = new VkShareDialogBox(this, files, position);
+            vkShareDialogBox.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialog) {
+                    SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = false;
+                    internetStatusChecker.cancel(true);
+                }
+            });
+            vkShareDialogBox.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    SharedStaticAppData.isAlive_AsyncTaskOnlineStatusRefresher = true;
+                    internetStatusChecker = new RefreshInternetConnectionStatus();
+                    internetStatusChecker.execute();
+
+                    if (((VkShareDialogBox) dialog).isFileExists() == false) {
+                        // file was deleted by user
+                        _refreshCurrentDirectory();
+                    }
+                }
+            });
+            vkShareDialogBox.show();
+        } else {
+            // directory was clicked
+            FileManager.setCurrentDir(mImageGalleryAdapter.getItem(position).getFile());
+            _refreshCurrentDirectory();
+        }
     }
 
     class RefreshInternetConnectionStatus extends AsyncTask<Void, Void, Void>{
